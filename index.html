@@ -342,6 +342,65 @@
       vertical-align: middle;
     }
 
+    /* ── HISTORY LOCK ── */
+    .history-gate {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      padding: 40px 24px;
+      border: 1.5px dashed var(--border);
+      border-radius: 10px;
+      background: var(--light);
+      text-align: center;
+    }
+    .lock-icon { font-size: 38px; line-height: 1; }
+    .lock-title { font-size: 15px; font-weight: 600; color: var(--navy); }
+    .lock-sub   { font-size: 13px; color: var(--muted); }
+    .passcode-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 4px;
+    }
+    .passcode-input {
+      width: 150px;
+      padding: 8px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      font-size: 18px;
+      letter-spacing: 6px;
+      text-align: center;
+      color: var(--navy);
+      outline: none;
+      transition: border-color 0.2s;
+      font-family: monospace;
+    }
+    .passcode-input:focus { border-color: var(--blue-light); }
+    .passcode-input.error { border-color: #ef4444; animation: shake 0.35s ease; }
+    .unlock-btn {
+      padding: 8px 18px;
+      background: var(--navy);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .unlock-btn:hover { background: var(--blue); }
+    .passcode-error {
+      font-size: 12.5px;
+      color: #ef4444;
+      display: none;
+    }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20%      { transform: translateX(-6px); }
+      60%      { transform: translateX(6px); }
+    }
+
     /* ── FOOTER ── */
     footer {
       text-align: center;
@@ -384,8 +443,8 @@
     <div class="avatar-col">
       <img class="avatar" src="avatar.png" alt="刘荣华 Mark Liu" />
       <div class="social-links">
-        <a class="social-btn" href="mailto:mark.liu@itl.com.cn">✉ 邮箱联系</a>
-        <a class="social-btn" href="https://www.itl.com.cn" target="_blank">🌐 海通安恒官网</a>
+        <a class="social-btn" href="mailto:13642639804@126.com">✉ 邮箱联系</a>
+        <a class="social-btn" href="http://itl.com.cn" target="_blank">🌐 海通安恒官网</a>
         <a class="social-btn" href="https://www.linkedin.com" target="_blank">in LinkedIn</a>
       </div>
     </div>
@@ -661,7 +720,21 @@
 
     <!-- Full history table -->
     <div class="sec-title" style="font-size:15px; border-bottom-width:1px; margin-bottom:14px;">完整项目履历（2007 — 2023）</div>
-    <div class="history-wrap">
+
+    <!-- Lock gate (visible by default) -->
+    <div class="history-gate" id="historyGate">
+      <div class="lock-icon">🔒</div>
+      <div class="lock-title">完整项目履历已加密</div>
+      <div class="lock-sub">请输入验证码查看全部 30 个项目详情</div>
+      <div class="passcode-row">
+        <input type="text" class="passcode-input" id="passcodeInput" placeholder="验证码" maxlength="7" />
+        <button class="unlock-btn" onclick="unlockHistory()">解锁</button>
+      </div>
+      <div class="passcode-error" id="passcodeError">❌ 验证码错误，请重试</div>
+    </div>
+
+    <!-- History table (hidden by default) -->
+    <div class="history-wrap" id="historyContent" style="display:none;">
       <table class="history-table">
         <thead>
           <tr>
@@ -769,10 +842,33 @@
   </section>
 
   <footer>
-    © 2025 刘荣华（Mark Liu）· 副总裁，<a href="https://www.itl.com.cn" target="_blank">海通安恒科技股份有限公司（ITL）</a>
+    © 2025 刘荣华（Mark Liu）· 副总裁，<a href="http://itl.com.cn" target="_blank">海通安恒科技股份有限公司（ITL）</a>
     <br /><span style="font-size:11px; margin-top:4px; display:block; color:#94a3b8;">Last updated: April 2025 · 如需联系请发送邮件</span>
   </footer>
 
 </div>
+
+<script>
+function unlockHistory() {
+  const input = document.getElementById('passcodeInput');
+  const gate = document.getElementById('historyGate');
+  const content = document.getElementById('historyContent');
+  const error = document.getElementById('passcodeError');
+
+  if (input.value === '9804136') {
+    gate.style.display = 'none';
+    content.style.display = 'block';
+    error.style.display = 'none';
+  } else {
+    input.classList.add('error');
+    error.style.display = 'block';
+    setTimeout(() => input.classList.remove('error'), 350);
+  }
+}
+
+document.getElementById('passcodeInput')?.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') unlockHistory();
+});
+</script>
 </body>
 </html>
