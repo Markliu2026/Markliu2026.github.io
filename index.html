@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>刘荣华（Mark Liu）</title>
-  <meta name="description" content="刘荣华，海通安恒科技副总裁，制造行业数字化转型专家，SAP/ERP领域二十年" />
+  <title>刘荣华（Mark Liu）- 副总裁 | 海通安恒科技</title>
+  <meta name="description" content="刘荣华，海通安恒科技副总裁，分管五大事业部，制造行业数字化转型专家，20年SAP/ERP实施经验" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
   <style>
@@ -39,11 +39,11 @@
       padding: 0 24px;
       display: flex;
       align-items: center;
-      gap: 0;
       position: sticky;
       top: 0;
       z-index: 100;
       box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      flex-wrap: wrap;
     }
     .nav-brand {
       color: white;
@@ -59,7 +59,7 @@
       text-decoration: none;
       font-size: 13.5px;
       font-weight: 500;
-      padding: 14px 16px;
+      padding: 14px 14px;
       transition: color 0.15s;
       white-space: nowrap;
     }
@@ -67,12 +67,12 @@
     nav a.active { border-bottom: 2px solid #60a5fa; }
 
     /* ── LAYOUT ── */
-    .page { max-width: 960px; margin: 0 auto; padding: 48px 24px 80px; }
+    .page { max-width: 980px; margin: 0 auto; padding: 48px 24px 80px; }
 
     /* ── PROFILE ── */
     .profile {
       display: grid;
-      grid-template-columns: 180px 1fr;
+      grid-template-columns: 190px 1fr;
       gap: 40px;
       align-items: flex-start;
       padding-bottom: 40px;
@@ -81,21 +81,16 @@
     }
     .avatar-col { display: flex; flex-direction: column; align-items: center; gap: 16px; }
     .avatar {
-      width: 160px;
-      height: 160px;
+      width: 170px;
+      height: 200px;
       border-radius: 6px;
-      box-shadow: 0 4px 20px rgba(37,99,235,0.2);
+      box-shadow: 0 4px 20px rgba(37,99,235,0.15);
       border: 3px solid var(--border);
       object-fit: cover;
       object-position: center top;
       display: block;
     }
-    .social-links {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      width: 100%;
-    }
+    .social-links { display: flex; flex-direction: column; gap: 8px; width: 100%; }
     .social-btn {
       display: flex;
       align-items: center;
@@ -112,22 +107,16 @@
       justify-content: center;
     }
     .social-btn:hover { background: #dbeafe; border-color: var(--blue-light); }
-    .social-icon { font-size: 14px; }
 
-    .info-col {}
     .info-col h1 {
-      font-size: 28px;
+      font-size: 30px;
       font-weight: 700;
       color: var(--text);
       letter-spacing: -0.3px;
       margin-bottom: 2px;
     }
-    .info-col .name-en {
-      font-size: 16px;
-      color: var(--muted);
-      font-weight: 400;
-      margin-bottom: 10px;
-    }
+    .name-en { font-size: 16px; color: var(--muted); font-weight: 400; margin-bottom: 10px; }
+
     .title-row {
       display: flex;
       align-items: center;
@@ -144,15 +133,16 @@
       font-size: 12.5px;
       font-weight: 600;
     }
-    .chip-vp { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
-    .chip-co { background: var(--blue-bg); color: var(--tag-color); border: 1px solid #bfdbfe; }
+    .chip-vp  { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    .chip-co  { background: var(--blue-bg); color: var(--tag-color); border: 1px solid #bfdbfe; }
     .chip-loc { background: #f1f5f9; color: var(--muted); border: 1px solid var(--border); font-weight: 400; }
+    .chip-award { background: #fdf2f8; color: #86198f; border: 1px solid #f0abfc; }
 
-    .meta-list { list-style: none; margin-bottom: 14px; }
+    .meta-list { list-style: none; margin-bottom: 12px; }
     .meta-list li {
       font-size: 13.5px;
       color: var(--muted);
-      padding: 2px 0;
+      padding: 3px 0;
       display: flex;
       align-items: flex-start;
       gap: 8px;
@@ -160,40 +150,40 @@
     .meta-list li .label {
       font-weight: 600;
       color: var(--text);
-      min-width: 60px;
+      min-width: 68px;
       flex-shrink: 0;
     }
 
     .bio {
       font-size: 14px;
       color: var(--text);
-      line-height: 1.75;
+      line-height: 1.8;
       background: var(--light);
       border-left: 3px solid var(--blue-light);
-      padding: 12px 16px;
+      padding: 14px 16px;
       border-radius: 0 6px 6px 0;
       margin-top: 12px;
     }
 
-    /* ── STATS ── */
     .stats {
       display: flex;
-      gap: 24px;
+      gap: 16px;
       margin-top: 18px;
       flex-wrap: wrap;
     }
     .stat-box {
       text-align: center;
-      padding: 10px 18px;
+      padding: 10px 16px;
       background: var(--light);
       border: 1px solid var(--border);
       border-radius: 8px;
+      min-width: 72px;
     }
-    .stat-num { font-size: 22px; font-weight: 700; color: var(--navy); line-height: 1; }
+    .stat-num   { font-size: 22px; font-weight: 700; color: var(--navy); line-height: 1; }
     .stat-label { font-size: 11px; color: var(--muted); margin-top: 3px; }
 
     /* ── SECTION ── */
-    section { margin-bottom: 48px; }
+    section { margin-bottom: 52px; }
     .sec-title {
       font-size: 18px;
       font-weight: 700;
@@ -205,6 +195,25 @@
       align-items: center;
       gap: 8px;
     }
+
+    /* ── AWARDS ── */
+    .awards-grid { display: flex; flex-wrap: wrap; gap: 12px; }
+    .award-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--light);
+      flex: 1;
+      min-width: 240px;
+      transition: border-color 0.15s;
+    }
+    .award-card:hover { border-color: #93c5fd; }
+    .award-icon { font-size: 22px; flex-shrink: 0; }
+    .award-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .award-sub   { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
 
     /* ── SKILLS ── */
     .skills-group { margin-bottom: 16px; }
@@ -224,61 +233,82 @@
       font-weight: 500;
       cursor: default;
     }
-    .tag-blue { background: var(--tag-bg); color: var(--tag-color); border: 1px solid #bfdbfe; }
-    .tag-slate { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
-    .tag-green { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
-    .tag-amber { background: #fef9c3; color: #854d0e; border: 1px solid #fef08a; }
+    .tag-blue   { background: var(--tag-bg); color: var(--tag-color); border: 1px solid #bfdbfe; }
+    .tag-green  { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .tag-amber  { background: #fef9c3; color: #854d0e; border: 1px solid #fef08a; }
     .tag-purple { background: #f3e8ff; color: #6b21a8; border: 1px solid #e9d5ff; }
+    .tag-rose   { background: #fdf2f8; color: #9d174d; border: 1px solid #fbcfe8; }
+    .tag-slate  { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
 
-    /* ── PROJECTS ── */
-    .project-list { display: flex; flex-direction: column; gap: 14px; }
-    .proj {
-      display: flex;
-      gap: 16px;
+    /* ── FEATURED PROJECTS ── */
+    .feat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 14px;
+      margin-bottom: 32px;
+    }
+    .proj-card {
       padding: 16px 18px;
       border: 1px solid var(--border);
       border-radius: 8px;
       background: #fff;
       transition: border-color 0.15s, box-shadow 0.15s;
     }
-    .proj:hover { border-color: #93c5fd; box-shadow: 0 2px 12px rgba(59,130,246,0.08); }
-    .proj-num {
-      flex-shrink: 0;
-      font-size: 18px;
-      font-weight: 700;
-      color: #cbd5e1;
-      min-width: 28px;
-      padding-top: 1px;
-    }
-    .proj-body { flex: 1; min-width: 0; }
-    .proj-header { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 5px; flex-wrap: wrap; }
+    .proj-card:hover { border-color: #93c5fd; box-shadow: 0 2px 12px rgba(59,130,246,0.08); }
     .proj-industry {
-      flex-shrink: 0;
-      font-size: 11px;
+      display: inline-block;
+      font-size: 10.5px;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.4px;
       padding: 2px 7px;
       border-radius: 3px;
       background: var(--blue-bg);
       color: var(--tag-color);
       border: 1px solid #bfdbfe;
-      margin-top: 2px;
+      margin-bottom: 7px;
     }
-    .proj-title { font-size: 14.5px; font-weight: 600; color: var(--text); line-height: 1.4; }
-    .proj-desc { font-size: 13.5px; color: var(--muted); line-height: 1.65; }
-    .proj-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
-    .proj-tag {
-      font-size: 11px;
-      padding: 2px 7px;
+    .proj-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.45; margin-bottom: 5px; }
+    .proj-role  { font-size: 12px; color: #7c3aed; font-weight: 500; margin-bottom: 5px; }
+    .proj-period{ font-size: 11.5px; color: var(--muted); }
+
+    /* ── HISTORY TABLE ── */
+    .history-wrap { overflow-x: auto; }
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+    .history-table thead th {
+      background: var(--navy);
+      color: white;
+      font-weight: 600;
+      padding: 9px 14px;
+      text-align: left;
+      font-size: 12.5px;
+      letter-spacing: 0.3px;
+    }
+    .history-table tbody tr { border-bottom: 1px solid #f1f5f9; }
+    .history-table tbody tr:hover { background: var(--blue-bg); }
+    .history-table td { padding: 9px 14px; vertical-align: middle; }
+    .td-period { color: var(--blue); font-weight: 600; white-space: nowrap; font-size: 12.5px; }
+    .td-company { color: var(--text); font-weight: 500; }
+    .td-role {
+      white-space: nowrap;
+      font-size: 12px;
+      padding: 2px 8px;
       border-radius: 4px;
       background: #f1f5f9;
-      color: var(--muted);
+      color: #475569;
       border: 1px solid var(--border);
+      display: inline-block;
     }
+    .td-industry { font-size: 12px; color: var(--muted); }
+    .highlight td { background: #fefce8 !important; }
+    .highlight .td-company { color: var(--navy); font-weight: 700; }
 
-    /* ── NEWS / EVENTS ── */
-    .news-list { display: flex; flex-direction: column; gap: 0; }
+    /* ── NEWS ── */
+    .news-list { display: flex; flex-direction: column; }
     .news-item {
       display: flex;
       gap: 20px;
@@ -292,17 +322,13 @@
       font-size: 12.5px;
       font-weight: 600;
       color: var(--blue);
-      min-width: 80px;
+      min-width: 76px;
       padding-top: 1px;
     }
     .news-content { flex: 1; }
-    .news-title { font-size: 14px; color: var(--text); line-height: 1.5; }
+    .news-title { font-size: 14px; color: var(--text); line-height: 1.55; }
     .news-title strong { color: var(--navy); }
-    .news-note {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 2px;
-    }
+    .news-note { font-size: 12px; color: var(--muted); margin-top: 3px; }
     .news-badge {
       display: inline-block;
       padding: 1px 7px;
@@ -313,6 +339,7 @@
       color: #92400e;
       border: 1px solid #fde68a;
       margin-left: 6px;
+      vertical-align: middle;
     }
 
     /* ── FOOTER ── */
@@ -326,14 +353,15 @@
     footer a { color: var(--blue); text-decoration: none; }
 
     /* ── RESPONSIVE ── */
-    @media (max-width: 600px) {
+    @media (max-width: 620px) {
       .profile { grid-template-columns: 1fr; }
-      .avatar-col { flex-direction: row; align-items: flex-start; flex-wrap: wrap; }
-      .avatar { width: 100px; height: 100px; font-size: 34px; }
+      .avatar-col { flex-direction: row; align-items: flex-start; flex-wrap: wrap; gap: 12px; }
+      .avatar { width: 110px; height: 130px; }
       .social-links { flex-direction: row; flex-wrap: wrap; width: auto; }
-      .social-btn { flex: none; }
       .info-col h1 { font-size: 22px; }
-      nav a { padding: 12px 10px; font-size: 12.5px; }
+      nav a { padding: 12px 10px; font-size: 12px; }
+      .feat-grid { grid-template-columns: 1fr; }
+      .history-table { font-size: 12px; }
     }
   </style>
 </head>
@@ -343,6 +371,7 @@
 <nav>
   <div class="nav-brand">刘荣华 Mark Liu</div>
   <a href="#about" class="active">首页</a>
+  <a href="#honors">荣誉</a>
   <a href="#skills">专长</a>
   <a href="#projects">项目案例</a>
   <a href="#news">动态</a>
@@ -355,15 +384,9 @@
     <div class="avatar-col">
       <img class="avatar" src="avatar.png" alt="刘荣华 Mark Liu" />
       <div class="social-links">
-        <a class="social-btn" href="mailto:mark.liu@itl.com.cn">
-          <span class="social-icon">✉</span> 邮箱联系
-        </a>
-        <a class="social-btn" href="https://www.itl.com.cn" target="_blank">
-          <span class="social-icon">🌐</span> 海通安恒官网
-        </a>
-        <a class="social-btn" href="https://www.linkedin.com" target="_blank">
-          <span class="social-icon">in</span> LinkedIn
-        </a>
+        <a class="social-btn" href="mailto:mark.liu@itl.com.cn">✉ 邮箱联系</a>
+        <a class="social-btn" href="https://www.itl.com.cn" target="_blank">🌐 海通安恒官网</a>
+        <a class="social-btn" href="https://www.linkedin.com" target="_blank">in LinkedIn</a>
       </div>
     </div>
 
@@ -374,43 +397,56 @@
         <span class="title-chip chip-vp">副总裁</span>
         <span class="title-chip chip-co">海通安恒科技（ITL）</span>
         <span class="title-chip chip-loc">📍 广东 · 珠海</span>
+        <span class="title-chip chip-award">🏆 珠海市创新人才</span>
       </div>
 
       <ul class="meta-list">
         <li>
           <span class="label">职务</span>
-          <span>副总裁 / 泛家居及装备制造事业部副总裁</span>
+          <span>副总裁，分管泛家居 &amp; 装备制造 &amp; 高科技 &amp; 智能制造 &amp; 供应链协同 <strong>五大事业部</strong></span>
         </li>
         <li>
           <span class="label">公司</span>
-          <span>海通安恒科技股份有限公司（ITL）— SAP 全球金牌合作伙伴、珠海总部</span>
+          <span>海通安恒科技股份有限公司（ITL）— SAP 全球金牌合作伙伴，总部珠海</span>
         </li>
         <li>
           <span class="label">经验</span>
-          <span>20+ 年制造业数字化、供应链管理、SAP/ERP 全栈实施</span>
+          <span>20 年 SAP/ERP 实施咨询经验，供应链、数字化转型、生产 &amp; 计划专家顾问</span>
+        </li>
+        <li>
+          <span class="label">讲师</span>
+          <span>浙江财经大学信管与工程学院 外聘讲师（多年）</span>
+        </li>
+        <li>
+          <span class="label">演讲</span>
+          <span>常年受邀出席 SAP、华为、CIO（华东/华南）行业峰会主讲嘉宾</span>
         </li>
         <li>
           <span class="label">行业</span>
-          <span>装备制造 · 汽车零部件 · 泛家居（瓷砖/建材）· 高科技制造</span>
+          <span>陶瓷卫浴 · 软装家居 · 装备制造 · 汽车零部件 · 机械 · 电子 · 非标制造 · 医药等</span>
         </li>
       </ul>
 
       <div class="bio">
-        制造行业数字化转型<strong>实战派专家</strong>，深耕 SAP / ERP 领域逾二十年。主导泛家居与装备制造事业部业务，服务 <strong>100+</strong> 家大中型制造企业（含多家上市公司及专精特新），擅长把复杂行业场景转化为可落地的数字化方案，助力企业实现供应链高效协同、精益生产与智能制造升级。
+        刘荣华先生是海通安恒公司副总裁，分管泛家居、装备制造、高科技、智能制造与供应链协同<strong>五大事业部</strong>。荣获<strong>珠海市软件与集成电路创新人才</strong>称号，常年受邀出席 SAP、华为、CIO（华东、华南）行业峰会担任主讲嘉宾，多年受聘浙江财经大学信管与工程学院外聘讲师。拥有 <strong>20 年 SAP 实施咨询经验</strong>，成功主导大型 ERP 系统上线，熟悉生产、销售、分销管理、物料仓库管理等核心业务流程，精通 SAP PP、MM、PM、QM 模块后台配置及项目管理。曾服务行业涵盖陶瓷卫浴、软装家居、装备（机械、模具、注塑、电机、钣金、电子、铸造）、非标制造、医药等。
       </div>
 
       <div class="stats">
         <div class="stat-box">
-          <div class="stat-num">20+</div>
-          <div class="stat-label">年行业经验</div>
+          <div class="stat-num">20</div>
+          <div class="stat-label">年咨询经验</div>
         </div>
         <div class="stat-box">
-          <div class="stat-num">100+</div>
-          <div class="stat-label">服务企业</div>
+          <div class="stat-num">5</div>
+          <div class="stat-label">分管事业部</div>
         </div>
         <div class="stat-box">
-          <div class="stat-num">4</div>
-          <div class="stat-label">核心行业</div>
+          <div class="stat-num">30+</div>
+          <div class="stat-label">实施项目</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">10+</div>
+          <div class="stat-label">覆盖行业</div>
         </div>
         <div class="stat-box">
           <div class="stat-num">SAP</div>
@@ -420,31 +456,71 @@
     </div>
   </div>
 
+  <!-- ── HONORS ── -->
+  <section id="honors">
+    <div class="sec-title">🏅 荣誉与认可</div>
+    <div class="awards-grid">
+      <div class="award-card">
+        <div class="award-icon">🏆</div>
+        <div>
+          <div class="award-title">珠海市软件与集成电路创新人才</div>
+          <div class="award-sub">珠海市政府认定 · 软件与信息技术领域</div>
+        </div>
+      </div>
+      <div class="award-card">
+        <div class="award-icon">🎓</div>
+        <div>
+          <div class="award-title">浙江财经大学 外聘讲师</div>
+          <div class="award-sub">信管与工程学院 · 多年受聘，传授数字化转型与 ERP 实践</div>
+        </div>
+      </div>
+      <div class="award-card">
+        <div class="award-icon">🎤</div>
+        <div>
+          <div class="award-title">SAP / 华为 / CIO 峰会主讲嘉宾</div>
+          <div class="award-sub">常年受邀，覆盖华东、华南主要行业峰会</div>
+        </div>
+      </div>
+      <div class="award-card">
+        <div class="award-icon">⭐</div>
+        <div>
+          <div class="award-title">SAP 全球金牌合作伙伴核心成员</div>
+          <div class="award-sub">海通安恒 ITL · SAP ONE Service / PCOE / AQM / PQP 认证</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ── SKILLS ── -->
   <section id="skills">
     <div class="sec-title">⚡ 核心专长</div>
 
     <div class="skills-group">
-      <div class="skills-group-label">SAP 技术栈</div>
+      <div class="skills-group-label">SAP 模块 &amp; 技术栈</div>
       <div class="tags">
+        <span class="tag tag-blue">SAP PP（生产计划）</span>
+        <span class="tag tag-blue">SAP MM（物料管理）</span>
+        <span class="tag tag-blue">SAP PM（设备管理）</span>
+        <span class="tag tag-blue">SAP QM（质量管理）</span>
+        <span class="tag tag-blue">SAP SD（销售分销）</span>
         <span class="tag tag-blue">SAP S/4HANA</span>
         <span class="tag tag-blue">RISE with SAP</span>
-        <span class="tag tag-blue">SAP ERP 全栈实施</span>
+        <span class="tag tag-blue">SAP ECC → S/4 升级</span>
         <span class="tag tag-blue">SAP BTP</span>
-        <span class="tag tag-blue">SAP QM</span>
-        <span class="tag tag-blue">SAP PP/MES 集成</span>
       </div>
     </div>
 
     <div class="skills-group">
-      <div class="skills-group-label">行业与场景</div>
+      <div class="skills-group-label">业务场景</div>
       <div class="tags">
-        <span class="tag tag-green">供应链优化</span>
+        <span class="tag tag-green">供应链管理与优化</span>
+        <span class="tag tag-green">生产 &amp; 计划管理</span>
         <span class="tag tag-green">精益制造</span>
-        <span class="tag tag-green">智能工厂</span>
-        <span class="tag tag-green">MES / PLM</span>
-        <span class="tag tag-green">S&OP 规划</span>
-        <span class="tag tag-green">库存优化</span>
+        <span class="tag tag-green">智能制造 / MES</span>
+        <span class="tag tag-green">分销管理</span>
+        <span class="tag tag-green">物料仓库管理</span>
+        <span class="tag tag-green">数据治理</span>
+        <span class="tag tag-green">S&amp;OP 规划</span>
       </div>
     </div>
 
@@ -453,19 +529,39 @@
       <div class="tags">
         <span class="tag tag-amber">数字化转型规划</span>
         <span class="tag tag-amber">集团管控</span>
-        <span class="tag tag-amber">集团财务与风控</span>
         <span class="tag tag-amber">专精特新数字化</span>
         <span class="tag tag-amber">大客户经营</span>
+        <span class="tag tag-amber">事业部战略管理</span>
+        <span class="tag tag-amber">项目总监 / PMO</span>
       </div>
     </div>
 
     <div class="skills-group">
-      <div class="skills-group-label">生态合作</div>
+      <div class="skills-group-label">服务行业</div>
+      <div class="tags">
+        <span class="tag tag-slate">陶瓷卫浴</span>
+        <span class="tag tag-slate">软装家居</span>
+        <span class="tag tag-slate">装备制造</span>
+        <span class="tag tag-slate">汽车零部件</span>
+        <span class="tag tag-slate">机械制造</span>
+        <span class="tag tag-slate">电子制造</span>
+        <span class="tag tag-slate">钣金 / 铸造</span>
+        <span class="tag tag-slate">新能源</span>
+        <span class="tag tag-slate">非标制造</span>
+        <span class="tag tag-slate">医药</span>
+        <span class="tag tag-slate">房地产</span>
+        <span class="tag tag-slate">环保</span>
+      </div>
+    </div>
+
+    <div class="skills-group">
+      <div class="skills-group-label">生态与合作</div>
       <div class="tags">
         <span class="tag tag-purple">华为生态</span>
         <span class="tag tag-purple">阿里云</span>
         <span class="tag tag-purple">SAP 生态合作</span>
         <span class="tag tag-purple">出海项目</span>
+        <span class="tag tag-rose">浙江财经大学 讲师</span>
       </div>
     </div>
   </section>
@@ -473,176 +569,141 @@
   <!-- ── PROJECTS ── -->
   <section id="projects">
     <div class="sec-title">🗂 项目案例</div>
-    <div class="project-list">
 
-      <div class="proj">
-        <div class="proj-num">01</div>
-        <div class="proj-body">
-          <div class="proj-header">
-            <span class="proj-industry">高科技制造</span>
-            <span class="proj-title">智信精密 SAP ERP 全球化项目</span>
-          </div>
-          <div class="proj-desc">助力精密制造企业出海，构建多主体集团管控体系，实现多货币财务一体化与研发制造协同，为企业国际化扩张提供数字底座。</div>
-          <div class="proj-tags">
-            <span class="proj-tag">集团管控</span><span class="proj-tag">多主体</span><span class="proj-tag">出海</span><span class="proj-tag">研发协同</span>
-          </div>
-        </div>
+    <!-- Featured cards -->
+    <div class="feat-grid">
+
+      <div class="proj-card">
+        <div class="proj-industry">新能源 · 光伏</div>
+        <div class="proj-title">古瑞瓦特 SAP 实施项目</div>
+        <div class="proj-role">项目总监 / 方案顾问</div>
+        <div class="proj-period">2022/03 — 2023/03</div>
       </div>
 
-      <div class="proj">
-        <div class="proj-num">02</div>
-        <div class="proj-body">
-          <div class="proj-header">
-            <span class="proj-industry">泛家居 · 建材</span>
-            <span class="proj-title">头部瓷砖品牌 SAP S/4HANA 全面转型</span>
-          </div>
-          <div class="proj-desc">主导国内头部瓷砖品牌端到端 S/4HANA 上线，覆盖产销协同、渠道管理与供应链智能补货，大幅提升库存周转效率。</div>
-          <div class="proj-tags">
-            <span class="proj-tag">S/4HANA</span><span class="proj-tag">供应链</span><span class="proj-tag">渠道管理</span><span class="proj-tag">智能补货</span>
-          </div>
-        </div>
+      <div class="proj-card">
+        <div class="proj-industry">汽车制造</div>
+        <div class="proj-title">众泰汽车 SAP 实施项目</div>
+        <div class="proj-role">项目总监 / 方案顾问</div>
+        <div class="proj-period">2022/11 — 2023/03</div>
       </div>
 
-      <div class="proj">
-        <div class="proj-num">03</div>
-        <div class="proj-body">
-          <div class="proj-header">
-            <span class="proj-industry">装备制造</span>
-            <span class="proj-title">大型装备制造商精益生产数字化</span>
-          </div>
-          <div class="proj-desc">引入 MES 与 SAP PP 深度集成，打通计划→排程→车间反馈全链路，生产效率提升 30%+，在制品积压显著降低。</div>
-          <div class="proj-tags">
-            <span class="proj-tag">MES</span><span class="proj-tag">SAP PP</span><span class="proj-tag">精益生产</span><span class="proj-tag">排程优化</span>
-          </div>
-        </div>
+      <div class="proj-card">
+        <div class="proj-industry">智能制造 · 装备</div>
+        <div class="proj-title">苏洲瀚川智能 SAP 实施项目</div>
+        <div class="proj-role">项目总监</div>
+        <div class="proj-period">2022/06 — 2022/12</div>
       </div>
 
-      <div class="proj">
-        <div class="proj-num">04</div>
-        <div class="proj-body">
-          <div class="proj-header">
-            <span class="proj-industry">汽车零部件</span>
-            <span class="proj-title">汽车零部件集团 RISE with SAP 上云</span>
-          </div>
-          <div class="proj-desc">主导集团整体云迁移方案，统一多工厂标准，月结周期缩短 50%，降低 IT 运维成本，实现集团统一管控。</div>
-          <div class="proj-tags">
-            <span class="proj-tag">RISE with SAP</span><span class="proj-tag">多工厂</span><span class="proj-tag">云迁移</span><span class="proj-tag">财务标准化</span>
-          </div>
-        </div>
+      <div class="proj-card">
+        <div class="proj-industry">新能源 · 智能制造</div>
+        <div class="proj-title">比亚迪弗迪科技智能制造项目</div>
+        <div class="proj-role">项目总监</div>
+        <div class="proj-period">2022/05 — 2023/01</div>
       </div>
 
-      <div class="proj">
-        <div class="proj-num">05</div>
-        <div class="proj-body">
-          <div class="proj-header">
-            <span class="proj-industry">建材 · 泛家居</span>
-            <span class="proj-title">建材行业供应链 S&OP 优化专项</span>
-          </div>
-          <div class="proj-desc">针对建材行业多 SKU、长尾备货痛点，设计 S&OP 流程与智能补货模型，库存周转率显著提升，呆滞品占比大幅下降。</div>
-          <div class="proj-tags">
-            <span class="proj-tag">S&OP</span><span class="proj-tag">智能补货</span><span class="proj-tag">库存优化</span><span class="proj-tag">需求预测</span>
-          </div>
-        </div>
+      <div class="proj-card">
+        <div class="proj-industry">泛家居 · 软装</div>
+        <div class="proj-title">慕思主数据治理优化项目</div>
+        <div class="proj-role">项目经理 / 方案顾问</div>
+        <div class="proj-period">2022/04 — 2022/11</div>
       </div>
 
-      <div class="proj">
-        <div class="proj-num">06</div>
-        <div class="proj-body">
-          <div class="proj-header">
-            <span class="proj-industry">装备制造</span>
-            <span class="proj-title">中型装备企业 PLM × SAP 集成</span>
-          </div>
-          <div class="proj-desc">打通研发 PLM 与 SAP ERP 数据壁垒，实现物料、BOM、工程变更单自动同步，研发到量产交期缩短 20%。</div>
-          <div class="proj-tags">
-            <span class="proj-tag">PLM</span><span class="proj-tag">BOM 管理</span><span class="proj-tag">研发协同</span><span class="proj-tag">ECR 管理</span>
-          </div>
-        </div>
+      <div class="proj-card">
+        <div class="proj-industry">装备制造</div>
+        <div class="proj-title">株洲瑞德尔 SAP 实施项目</div>
+        <div class="proj-role">项目总监 / 方案顾问</div>
+        <div class="proj-period">2021/10 — 2022/04</div>
       </div>
 
-      <div class="proj">
-        <div class="proj-num">07</div>
-        <div class="proj-body">
-          <div class="proj-header">
-            <span class="proj-industry">高科技 · 电子</span>
-            <span class="proj-title">电子制造 SMT 产线智能工厂试点</span>
-          </div>
-          <div class="proj-desc">联合华为云 IoT，将 SMT 产线数据实时采集接入 SAP，构建产线数字孪生与质量追溯体系，实现设备预维护。</div>
-          <div class="proj-tags">
-            <span class="proj-tag">IoT</span><span class="proj-tag">数字孪生</span><span class="proj-tag">质量追溯</span><span class="proj-tag">华为云</span>
-          </div>
-        </div>
+      <div class="proj-card">
+        <div class="proj-industry">高科技制造</div>
+        <div class="proj-title">深圳智信精密 SAP 实施项目</div>
+        <div class="proj-role">项目总监 / 方案顾问</div>
+        <div class="proj-period">2021/04 — 2021/12</div>
       </div>
 
-      <div class="proj">
-        <div class="proj-num">08</div>
-        <div class="proj-body">
-          <div class="proj-header">
-            <span class="proj-industry">泛家居 · 家具</span>
-            <span class="proj-title">大型家具集团集团财务管控平台</span>
-          </div>
-          <div class="proj-desc">为多法人家具集团搭建统一财务核算与资金管理中台，实现集团穿透式管控与实时风险预警，提升资金利用效率。</div>
-          <div class="proj-tags">
-            <span class="proj-tag">集团财务</span><span class="proj-tag">资金管理</span><span class="proj-tag">风控预警</span><span class="proj-tag">多法人</span>
-          </div>
-        </div>
+      <div class="proj-card">
+        <div class="proj-industry">新能源</div>
+        <div class="proj-title">远景能源系统实施及现场运维项目</div>
+        <div class="proj-role">项目总监 / 方案顾问</div>
+        <div class="proj-period">2021/01 — 2021/12</div>
       </div>
 
-      <div class="proj">
-        <div class="proj-num">09</div>
-        <div class="proj-body">
-          <div class="proj-header">
-            <span class="proj-industry">汽车零部件</span>
-            <span class="proj-title">汽车零部件企业质量管理体系数字化</span>
-          </div>
-          <div class="proj-desc">依托 SAP QM，建立进料、过程、成品全流程质检数字化，对接客户 EDI 实现 PPAP 电子化，满足主机厂质量审核要求。</div>
-          <div class="proj-tags">
-            <span class="proj-tag">SAP QM</span><span class="proj-tag">EDI</span><span class="proj-tag">PPAP</span><span class="proj-tag">主机厂合规</span>
-          </div>
-        </div>
+      <div class="proj-card">
+        <div class="proj-industry">新能源 · 汽车</div>
+        <div class="proj-title">广汽巨湾 SAP 实施项目</div>
+        <div class="proj-role">项目总监</div>
+        <div class="proj-period">2021/03 — 2021/07</div>
       </div>
 
-      <div class="proj">
-        <div class="proj-num">10</div>
-        <div class="proj-body">
-          <div class="proj-header">
-            <span class="proj-industry">装备制造</span>
-            <span class="proj-title">专精特新装备企业东南亚 ERP 出海部署</span>
-          </div>
-          <div class="proj-desc">协助专精特新装备企业在东南亚子公司落地 SAP，实现跨境税务合规、多币种结算与总部联合管控，打通全球数据链路。</div>
-          <div class="proj-tags">
-            <span class="proj-tag">出海</span><span class="proj-tag">跨境税务</span><span class="proj-tag">多币种</span><span class="proj-tag">东南亚</span>
-          </div>
-        </div>
+      <div class="proj-card">
+        <div class="proj-industry">泛家居 · 家具</div>
+        <div class="proj-title">顾家家居 SAP 信息化项目</div>
+        <div class="proj-role">项目总监 / 方案顾问</div>
+        <div class="proj-period">2019/10 — 2020/08</div>
       </div>
 
-      <div class="proj">
-        <div class="proj-num">11</div>
-        <div class="proj-body">
-          <div class="proj-header">
-            <span class="proj-industry">消费品 · 零售</span>
-            <span class="proj-title">专精特新消费品品牌全域数字化</span>
-          </div>
-          <div class="proj-desc">从 ERP 选型到上线交付，构建供应链、仓储、财务一体化平台，支撑品牌快速扩张，实现全渠道库存可视。</div>
-          <div class="proj-tags">
-            <span class="proj-tag">ERP 选型</span><span class="proj-tag">WM 仓储</span><span class="proj-tag">财务一体化</span><span class="proj-tag">全渠道</span>
-          </div>
-        </div>
+      <div class="proj-card">
+        <div class="proj-industry">泛家居 · 陶瓷</div>
+        <div class="proj-title">东鹏陶瓷 ECC → S/4 ERP 全新实施</div>
+        <div class="proj-role">项目经理</div>
+        <div class="proj-period">2018/07 — 2019/04</div>
       </div>
 
-      <div class="proj">
-        <div class="proj-num">12</div>
-        <div class="proj-body">
-          <div class="proj-header">
-            <span class="proj-industry">生命科学</span>
-            <span class="proj-title">医疗器械制造商 SAP GMP 合规项目</span>
-          </div>
-          <div class="proj-desc">为医疗器械客户设计 GMP/CSV 合规管理体系，在 SAP 中实现批次追溯、偏差管理与电子签名，顺利通过 FDA 审计。</div>
-          <div class="proj-tags">
-            <span class="proj-tag">GMP 合规</span><span class="proj-tag">批次追溯</span><span class="proj-tag">CSV</span><span class="proj-tag">FDA</span>
-          </div>
-        </div>
+      <div class="proj-card">
+        <div class="proj-industry">装备制造</div>
+        <div class="proj-title">日立电梯（中国）SAP ERP 项目</div>
+        <div class="proj-role">PP 顾问</div>
+        <div class="proj-period">2007/06 — 2009/08</div>
       </div>
 
+    </div>
+
+    <!-- Full history table -->
+    <div class="sec-title" style="font-size:15px; border-bottom-width:1px; margin-bottom:14px;">完整项目履历（2007 — 2023）</div>
+    <div class="history-wrap">
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>时间段</th>
+            <th>项目 / 客户</th>
+            <th>担任角色</th>
+            <th>行业</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="td-period">2022/03 — 2023/03</td><td class="td-company">古瑞瓦特 SAP 实施项目</td><td><span class="td-role">项目总监 / 方案顾问</span></td><td class="td-industry">新能源 · 光伏</td></tr>
+          <tr><td class="td-period">2022/11 — 2023/03</td><td class="td-company">众泰汽车 SAP 实施项目</td><td><span class="td-role">项目总监 / 方案顾问</span></td><td class="td-industry">汽车制造</td></tr>
+          <tr><td class="td-period">2022/06 — 2022/12</td><td class="td-company">苏洲瀚川智能 SAP 实施项目</td><td><span class="td-role">项目总监</span></td><td class="td-industry">智能制造</td></tr>
+          <tr><td class="td-period">2022/05 — 2023/01</td><td class="td-company">比亚迪弗迪科技智能制造项目</td><td><span class="td-role">项目总监</span></td><td class="td-industry">新能源 · 智能制造</td></tr>
+          <tr><td class="td-period">2022/04 — 2022/11</td><td class="td-company">慕思主数据治理优化项目</td><td><span class="td-role">项目经理 / 方案顾问</span></td><td class="td-industry">泛家居 · 软装</td></tr>
+          <tr><td class="td-period">2021/10 — 2022/04</td><td class="td-company">株洲瑞德尔 SAP 实施项目</td><td><span class="td-role">项目总监 / 方案顾问</span></td><td class="td-industry">装备制造</td></tr>
+          <tr><td class="td-period">2021/04 — 2021/12</td><td class="td-company">深圳智信精密 SAP 实施项目</td><td><span class="td-role">项目总监 / 方案顾问</span></td><td class="td-industry">高科技制造</td></tr>
+          <tr><td class="td-period">2021/01 — 2021/12</td><td class="td-company">远景能源系统实施及现场运维项目</td><td><span class="td-role">项目总监 / 方案顾问</span></td><td class="td-industry">新能源</td></tr>
+          <tr><td class="td-period">2021/03 — 2021/07</td><td class="td-company">广汽巨湾 SAP 实施项目</td><td><span class="td-role">项目总监</span></td><td class="td-industry">新能源 · 汽车</td></tr>
+          <tr><td class="td-period">2021/04 — 2021/12</td><td class="td-company">新城控股 · 华诚造价业务协同平台</td><td><span class="td-role">项目总监 / 方案顾问</span></td><td class="td-industry">房地产</td></tr>
+          <tr><td class="td-period">2021/04 — 2021/12</td><td class="td-company">TATA 木门工程业务实施</td><td><span class="td-role">项目总监</span></td><td class="td-industry">泛家居</td></tr>
+          <tr><td class="td-period">2021/03 — 2021/10</td><td class="td-company">中联农机 SAP 实施项目</td><td><span class="td-role">项目总监</span></td><td class="td-industry">装备制造</td></tr>
+          <tr><td class="td-period">2020/11 — 2021/07</td><td class="td-company">新锦成 SAP 实施项目</td><td><span class="td-role">项目总监 / 方案顾问</span></td><td class="td-industry">制造</td></tr>
+          <tr><td class="td-period">2020/03 — 2021/01</td><td class="td-company">深圳科瑞技术 ERP 项目</td><td><span class="td-role">专家顾问</span></td><td class="td-industry">高科技</td></tr>
+          <tr class="highlight"><td class="td-period">2019/10 — 2020/08</td><td class="td-company">顾家家居 SAP 信息化项目</td><td><span class="td-role">项目总监 / 方案顾问</span></td><td class="td-industry">泛家居 · 家具</td></tr>
+          <tr><td class="td-period">2019/07 — 2019/10</td><td class="td-company">赛格威 SAP 实施项目（小米科技旗下）</td><td><span class="td-role">项目经理</span></td><td class="td-industry">高科技 · 出行</td></tr>
+          <tr><td class="td-period">2018/12 — 2019/07</td><td class="td-company">浙江春风动力 SAP 实施项目</td><td><span class="td-role">项目总监 / 方案顾问</span></td><td class="td-industry">装备制造</td></tr>
+          <tr class="highlight"><td class="td-period">2018/07 — 2019/04</td><td class="td-company">东鹏陶瓷 ECC → S/4 ERP 全新实施</td><td><span class="td-role">项目经理</span></td><td class="td-industry">泛家居 · 陶瓷</td></tr>
+          <tr><td class="td-period">2018/04 — 2018/06</td><td class="td-company">恒洁集团 SAP 项目第一阶段</td><td><span class="td-role">项目经理</span></td><td class="td-industry">泛家居 · 卫浴</td></tr>
+          <tr><td class="td-period">2018/01 — 2018/04</td><td class="td-company">京磁材料科技 SAP 实施项目</td><td><span class="td-role">项目经理 / 方案顾问</span></td><td class="td-industry">高科技 · 新材料</td></tr>
+          <tr><td class="td-period">2017/06 — 2017/10</td><td class="td-company">南方中金环境 SAP 二期 &amp; 三期迁移项目</td><td><span class="td-role">项目经理</span></td><td class="td-industry">环保</td></tr>
+          <tr><td class="td-period">2017/02 — 2017/06</td><td class="td-company">伟嘉供应链优化项目</td><td><span class="td-role">方案设计顾问</span></td><td class="td-industry">消费品</td></tr>
+          <tr><td class="td-period">2015/12 — 2017/01</td><td class="td-company">南方泵业股份有限公司 SAP ERP 项目</td><td><span class="td-role">PP 顾问</span></td><td class="td-industry">装备制造</td></tr>
+          <tr><td class="td-period">2015/03 — 2015/10</td><td class="td-company">浙江森宇集团 SAP ERP 项目</td><td><span class="td-role">PP 顾问</span></td><td class="td-industry">制造</td></tr>
+          <tr><td class="td-period">2014/10 — 2015/02</td><td class="td-company">东江塑胶制品（苏州）SAP ERP 项目</td><td><span class="td-role">PP 顾问</span></td><td class="td-industry">制造</td></tr>
+          <tr><td class="td-period">2014/01 — 2014/08</td><td class="td-company">广电房地产开发集团股份有限公司 SAP ERP</td><td><span class="td-role">PP 顾问</span></td><td class="td-industry">房地产</td></tr>
+          <tr><td class="td-period">2013/04 — 2013/11</td><td class="td-company">广州从化精密钣金制造（集团）SAP ERP</td><td><span class="td-role">PP 顾问</span></td><td class="td-industry">钣金制造</td></tr>
+          <tr><td class="td-period">2012/04 — 2012/12</td><td class="td-company">广东长青（集团）股份有限公司 SAP ERP</td><td><span class="td-role">PP 顾问</span></td><td class="td-industry">制造</td></tr>
+          <tr><td class="td-period">2009/10 — 2012/02</td><td class="td-company">广州市昊志机电股份有限公司 SAP ERP</td><td><span class="td-role">PP 顾问</span></td><td class="td-industry">装备制造</td></tr>
+          <tr class="highlight"><td class="td-period">2007/06 — 2009/08</td><td class="td-company">日立电梯（中国）有限公司（大石工厂）SAP ERP</td><td><span class="td-role">PP 顾问</span></td><td class="td-industry">装备制造</td></tr>
+        </tbody>
+      </table>
     </div>
   </section>
 
@@ -679,7 +740,28 @@
             出席 <strong>华为智慧企业生态高峰论坛</strong>（深圳），发表演讲《制造型企业供应链变革与数字化转型》
             <span class="news-badge">特邀嘉宾</span>
           </div>
-          <div class="news-note">唯一受邀的本土信息化企业演讲嘉宾，分享制造业供应链变革实践</div>
+          <div class="news-note">唯一受邀的本土信息化企业演讲嘉宾</div>
+        </div>
+      </div>
+
+      <div class="news-item">
+        <div class="news-date">常年</div>
+        <div class="news-content">
+          <div class="news-title">
+            受邀出席 <strong>SAP、华为、CIO（华东 / 华南）</strong> 行业峰会担任主讲嘉宾
+          </div>
+          <div class="news-note">聚焦供应链变革、精益制造、专精特新数字化落地等主题</div>
+        </div>
+      </div>
+
+      <div class="news-item">
+        <div class="news-date">多年</div>
+        <div class="news-content">
+          <div class="news-title">
+            受聘 <strong>浙江财经大学信管与工程学院</strong> 外聘讲师
+            <span class="news-badge">学术</span>
+          </div>
+          <div class="news-note">授课内容涵盖 ERP 实施方法论、企业数字化转型等</div>
         </div>
       </div>
 
