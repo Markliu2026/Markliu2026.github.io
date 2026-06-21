@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import "@arco-design/web-react/dist/css/arco.css";
 import "./globals.css";
+import Providers from "./providers";
 
 export const metadata: Metadata = {
   title: "场景提报与评审系统",
@@ -9,7 +11,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="zh-CN">
-      <body>{children}</body>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

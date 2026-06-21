@@ -1,38 +1,41 @@
+"use client";
+
+import { Tag } from "@arco-design/web-react";
 import { RECO_LABELS, STATUS_LABELS } from "@/lib/types";
 
 const STATUS_COLOR: Record<string, string> = {
-  draft: "bg-gray-100 text-gray-600",
-  submitted: "bg-blue-100 text-blue-700",
-  need_info: "bg-amber-100 text-amber-700",
-  screening: "bg-indigo-100 text-indigo-700",
-  observing: "bg-slate-100 text-slate-600",
-  recommend_deep: "bg-green-100 text-green-700",
-  rejected: "bg-red-100 text-red-600",
-  merged: "bg-purple-100 text-purple-600",
+  draft: "gray",
+  submitted: "arcoblue",
+  need_info: "orange",
+  screening: "purple",
+  observing: "gray",
+  recommend_deep: "green",
+  rejected: "red",
+  merged: "purple",
 };
 
 const RECO_COLOR: Record<string, string> = {
-  P0: "bg-green-600 text-white",
-  P1: "bg-green-100 text-green-700",
-  P2: "bg-slate-100 text-slate-600",
-  reject: "bg-red-100 text-red-600",
-  need_info: "bg-amber-100 text-amber-700",
-  merge: "bg-purple-100 text-purple-600",
+  P0: "green",
+  P1: "lime",
+  P2: "gray",
+  reject: "red",
+  need_info: "orange",
+  merge: "purple",
 };
 
 export function StatusBadge({ status }: { status: string }) {
   return (
-    <span className={`px-2 py-0.5 rounded text-xs ${STATUS_COLOR[status] ?? "bg-gray-100"}`}>
+    <Tag color={STATUS_COLOR[status] ?? "gray"} size="small">
       {STATUS_LABELS[status] ?? status}
-    </span>
+    </Tag>
   );
 }
 
 export function RecoBadge({ reco }: { reco?: string | null }) {
-  if (!reco) return <span className="text-xs text-gray-300">—</span>;
+  if (!reco) return <span style={{ color: "var(--color-text-4)" }}>—</span>;
   return (
-    <span className={`px-2 py-0.5 rounded text-xs ${RECO_COLOR[reco] ?? "bg-gray-100"}`}>
+    <Tag color={RECO_COLOR[reco] ?? "gray"} size="small" bordered>
       {RECO_LABELS[reco] ?? reco}
-    </span>
+    </Tag>
   );
 }

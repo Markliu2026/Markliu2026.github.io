@@ -1,15 +1,31 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { Avatar, Badge, Dropdown, Menu, Space } from "@arco-design/web-react";
+import { IconExport, IconUser } from "@arco-design/web-react/icon";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { api } from "@/lib/api";
-import type { User } from "@/lib/types";
+import type { Notification, User } from "@/lib/types";
+
+const ROLE_LABELS: Record<string, string> = {
+  submitter: "提报人", owner: "Owner", screener: "初筛人", reviewer: "评委",
+  ai_rep: "AI研发", manager: "管理层", admin: "管理员",
+};
+
+const ITEMS: { key: string; path: string; label: string; screener?: boolean }[] = [
+  { key: "scenarios", path: "/scenarios", label: "我的提报" },
+  { key: "new", path: "/scenarios/new", label: "新建提报" },
+  { key: "library", path: "/library", label: "场景库" },
+  { key: "screening", path: "/screening", label: "初筛队列", screener: true },
+  { key: "notifications", path: "/notifications", label: "通知" },
+];
 
 export default function Nav() {
   const { user, token, setUser, logout, hydrate } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
+  const [unread, setUnread] = useState(0);
 
   useEffect(() => {
     hydrate();
@@ -21,40 +37,86 @@ export default function Nav() {
     }
   }, [token, user, setUser, logout]);
 
-  const isScreener =
-    user?.roles.includes("screener") || user?.roles.includes("admin");
+  useEffect(() => {
+    if (token) {
+      api
+        .get<Notification[]>("/api/notifications")
+        .then((ns) => setUnread(ns.filter((n) => !n.is_read).length))
+        .catch(() => {});
+    }
+  }, [token, pathname]);
+
+  const isScreener = user?.roles.includes("screener") || user?.roles.includes("admin");
+  const items = ITEMS.filter((i) => !i.screener || isScreener);
+  const selected =
+    items.find((i) => i.path === pathname)?.key ??
+    (pathname.startsWith("/scenarios/new") ? "new" : pathname.startsWith("/scenario") ? "scenarios" : "");
 
   return (
-    <header className="bg-white border-b">
-      <div className="max-w-6xl mx-auto px-4 h-14 flex items-center gap-6">
-        <span className="font-semibold text-blue-700">金种子 · 场景提报评审</span>
-        <nav className="flex gap-4 text-sm text-gray-600">
-          <Link href="/scenarios" className="hover:text-blue-700">我的提报</Link>
-          <Link href="/scenarios/new" className="hover:text-blue-700">新建提报</Link>
-          <Link href="/library" className="hover:text-blue-700">场景库</Link>
-          {isScreener && (
-            <Link href="/screening" className="hover:text-blue-700 font-medium text-blue-600">
-              初筛队列
-            </Link>
-          )}
-        </nav>
-        <div className="ml-auto flex items-center gap-3 text-sm">
-          {user && (
-            <span className="text-gray-500">
-              {user.display_name}（{user.roles.join("/")}）
-            </span>
-          )}
-          <button
-            onClick={() => {
-              logout();
-              router.push("/login");
-            }}
-            className="text-gray-400 hover:text-red-600"
-          >
-            退出
-          </button>
-        </div>
+    <div
+      style={{
+        height: 60,
+        background: "#fff",
+        borderBottom: "1px solid var(--color-border-2)",
+        display: "flex",
+        alignItems: "center",
+        padding: "0 24px",
+        position: "sticky",
+        top: 0,
+        zIndex: 100,
+      }}
+    >
+      <div style={{ fontWeight: 600, color: "rgb(var(--primary-6))", fontSize: 16, marginRight: 32, whiteSpace: "nowrap" }}>
+        🌱 金种子 · 场景提报评审
       </div>
-    </header>
+      <Menu
+        mode="horizontal"
+        selectedKeys={[selected]}
+        style={{ flex: 1, border: "none", background: "transparent" }}
+        onClickMenuItem={(key) => {
+          const it = items.find((i) => i.key === key);
+          if (it) router.push(it.path);
+        }}
+      >
+        {items.map((i) => (
+          <Menu.Item key={i.key}>
+            {i.key === "notifications" && unread > 0 ? (
+              <Badge count={unread} dot offset={[6, -2]}>
+                {i.label}
+              </Badge>
+            ) : (
+              i.label
+            )}
+          </Menu.Item>
+        ))}
+      </Menu>
+      <Dropdown
+        droplist={
+          <Menu
+            onClickMenuItem={(k) => {
+              if (k === "logout") {
+                logout();
+                router.push("/login");
+              }
+            }}
+          >
+            <Menu.Item key="logout">
+              <IconExport style={{ marginRight: 8 }} />
+              切换角色 / 退出
+            </Menu.Item>
+          </Menu>
+        }
+        position="br"
+      >
+        <Space style={{ cursor: "pointer" }}>
+          <Avatar size={28} style={{ background: "rgb(var(--primary-6))" }}>
+            <IconUser />
+          </Avatar>
+          <span style={{ fontSize: 13, color: "var(--color-text-2)" }}>
+            {user ? `${user.display_name}（${user.roles.map((r) => ROLE_LABELS[r] ?? r).join("/")}）` : ""}
+          </span>
+        </Space>
+      </Dropdown>
+    </div>
   );
 }

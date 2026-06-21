@@ -1,11 +1,10 @@
-@import "tailwindcss";
-
-:root {
-  --bg: #f6f7f9;
-}
-
+/* 全局基础样式（视觉主体交由 Arco Design） */
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
 body {
-  background: var(--bg);
-  color: #1a1a1a;
-  font-family: system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: var(--color-fill-1, #f7f8fa);
+  color: var(--color-text-1, #1d2129);
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei",
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
+a { text-decoration: none; }

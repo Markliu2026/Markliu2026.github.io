@@ -1,5 +1,6 @@
+// 视觉主体由 Arco Design 提供，无需 Tailwind 处理
 const config = {
-  plugins: { "@tailwindcss/postcss": {} },
+  plugins: {},
 };
 
 export default config;

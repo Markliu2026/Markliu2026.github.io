@@ -1,13 +1,17 @@
 "use client";
 
-import Link from "next/link";
+import { Card, Empty, Grid, Space, Spin, Typography } from "@arco-design/web-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import Nav from "@/components/Nav";
+import PageContainer from "@/components/PageContainer";
 import { RecoBadge, StatusBadge } from "@/components/Badges";
 import { api } from "@/lib/api";
 import type { Scenario } from "@/lib/types";
 
+const { Row, Col } = Grid;
+
 export default function LibraryPage() {
+  const router = useRouter();
   const [items, setItems] = useState<Scenario[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -16,35 +20,51 @@ export default function LibraryPage() {
   }, []);
 
   return (
-    <>
-      <Nav />
-      <main className="max-w-6xl mx-auto px-4 py-6">
-        <h1 className="text-lg font-semibold mb-1">场景库</h1>
-        <p className="text-sm text-gray-400 mb-4">推荐深评 / 入库观察的公开场景（§9.1）</p>
+    <PageContainer>
+      <Typography.Title heading={6} style={{ margin: "0 0 2px" }}>
+        场景库
+      </Typography.Title>
+      <Typography.Text type="secondary">推荐深评 / 入库观察的公开场景（§9.1）</Typography.Text>
 
+      <div style={{ marginTop: 16 }}>
         {loading ? (
-          <p className="text-gray-400 text-sm">加载中...</p>
+          <Spin />
         ) : items.length === 0 ? (
-          <p className="text-gray-400 text-sm">暂无公开场景。</p>
+          <Empty description="暂无公开场景。完成一次初筛流转后这里会出现场景。" />
         ) : (
-          <div className="grid grid-cols-2 gap-4">
+          <Row gutter={[16, 16]}>
             {items.map((s) => (
-              <Link key={s.id} href={`/scenarios/${s.id}`}
-                className="bg-white rounded-lg shadow-sm p-4 hover:shadow transition">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="font-medium text-blue-700">{s.title}</span>
-                  <RecoBadge reco={s.latest_recommendation} />
-                </div>
-                <div className="flex items-center gap-2 mb-2">
-                  <StatusBadge status={s.status} />
-                  <span className="text-xs text-gray-400">{s.sap_modules.join("、")}</span>
-                </div>
-                <p className="text-sm text-gray-500 line-clamp-2">{s.pain_point}</p>
-              </Link>
+              <Col span={12} key={s.id}>
+                <Card
+                  hoverable
+                  style={{ borderRadius: 8, cursor: "pointer", height: "100%" }}
+                  onClick={() => router.push(`/scenarios/${s.id}`)}
+                >
+                  <Space style={{ marginBottom: 8 }}>
+                    <Typography.Text style={{ fontWeight: 600, color: "rgb(var(--primary-6))" }}>
+                      {s.title}
+                    </Typography.Text>
+                    <RecoBadge reco={s.latest_recommendation} />
+                  </Space>
+                  <Space style={{ marginBottom: 8 }}>
+                    <StatusBadge status={s.status} />
+                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                      {s.sap_modules.join("、")}
+                    </Typography.Text>
+                  </Space>
+                  <Typography.Paragraph
+                    type="secondary"
+                    style={{ margin: 0 }}
+                    ellipsis={{ rows: 2 }}
+                  >
+                    {s.pain_point}
+                  </Typography.Paragraph>
+                </Card>
+              </Col>
             ))}
-          </div>
+          </Row>
         )}
-      </main>
-    </>
+      </div>
+    </PageContainer>
   );
 }
