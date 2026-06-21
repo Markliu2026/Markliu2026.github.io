@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>场景提交及评审系统 · 金种子众包计划</title>
+<style>
+/* ============ 设计令牌（深色科技蓝/靛蓝 + 橙/青点缀） ============ */
+:root{
+  --bg:#0c1326;            /* 页面底色 */
+  --bg-2:#111c38;          /* 次级背景 */
+  --panel-bg:#15213f;      /* 卡片背景 */
+  --panel-bg-2:#1b2a4e;    /* 卡片内嵌背景 */
+  --border:#27375f;        /* 边框 */
+  --primary:#4f6bff;       /* 靛蓝主色 */
+  --primary-2:#6d86ff;
+  --accent:#ff9d42;        /* 橙点缀 */
+  --cyan:#34d3e0;          /* 青点缀 */
+  --text:#e8edf7;          /* 主文字 */
+  --text-2:#9fb0d0;        /* 次要文字 */
+  --text-3:#6b7ba0;        /* 弱文字 */
+  --ok:#34d399;            /* 通过/绿 */
+  --warn:#fbbf24;          /* 警告/黄 */
+  --danger:#f87171;        /* 红线/危险 */
+  --p0:#34d399;
+  --p1:#4f6bff;
+  --p2:#fbbf24;
+  --drop:#94a3b8;
+  --radius:14px;
+  --radius-sm:9px;
+  --shadow:0 8px 28px rgba(0,0,0,.35);
+  --shadow-sm:0 3px 12px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  background:radial-gradient(1200px 600px at 80% -10%,#1b2c55 0%,transparent 55%),
+             radial-gradient(900px 500px at 0% 0%,#142048 0%,transparent 50%),
+             var(--bg);
+  color:var(--text);
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:var(--primary-2);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* ============ 顶部栏 ============ */
+header{
+  position:sticky;top:0;z-index:50;
+  background:rgba(12,19,38,.85);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border);
+}
+.top{
+  max-width:1240px;margin:0 auto;padding:14px 22px;
+  display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{
+  width:38px;height:38px;border-radius:10px;flex:0 0 auto;
+  background:linear-gradient(135deg,var(--primary),var(--cyan));
+  display:grid;place-items:center;font-weight:800;color:#fff;font-size:18px;
+  box-shadow:0 4px 14px rgba(79,107,255,.45);
+}
+.brand h1{font-size:17px;font-weight:700;letter-spacing:.3px}
+.brand p{font-size:12px;color:var(--text-3)}
+.back-link{
+  margin-left:auto;font-size:13px;color:var(--text-2);
+  border:1px solid var(--border);padding:7px 13px;border-radius:8px;
+  transition:.15s;
+}
+.back-link:hover{border-color:var(--primary);color:var(--text);text-decoration:none}
+
+/* ============ Tab 导航 ============ */
+.tabs{
+  max-width:1240px;margin:0 auto;padding:0 22px;
+  display:flex;gap:6px;flex-wrap:wrap;
+}
+.tab{
+  appearance:none;background:none;border:none;cursor:pointer;
+  color:var(--text-2);font-size:14px;font-weight:600;font-family:inherit;
+  padding:13px 18px;border-bottom:2px solid transparent;
+  display:flex;align-items:center;gap:8px;transition:.15s;
+}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--text);border-bottom-color:var(--primary)}
+.tab .badge{
+  background:var(--panel-bg-2);color:var(--text-2);
+  font-size:11px;padding:1px 8px;border-radius:20px;font-weight:700;
+}
+.tab.active .badge{background:var(--primary);color:#fff}
+
+/* ============ 布局 ============ */
+main{max-width:1240px;margin:0 auto;padding:26px 22px 80px}
+.view{display:none;animation:fade .3s ease}
+.view.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.section-head{margin-bottom:18px}
+.section-head h2{font-size:22px;font-weight:700;display:flex;align-items:center;gap:10px}
+.section-head .sub{color:var(--text-3);font-size:13px;margin-top:4px}
+.tag-ref{
+  font-size:11px;color:var(--cyan);border:1px solid rgba(52,211,224,.35);
+  background:rgba(52,211,224,.08);padding:2px 8px;border-radius:6px;font-weight:600;
+}
+
+/* ============ 卡片/面板 ============ */
+.card{
+  background:var(--panel-bg);border:1px solid var(--border);
+  border-radius:var(--radius);box-shadow:var(--shadow-sm);
+  padding:22px;margin-bottom:18px;
+}
+.card > h3{font-size:15px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.card > .card-desc{color:var(--text-3);font-size:12.5px;margin-bottom:16px}
+
+/* ============ 表单 ============ */
+.grid{display:grid;gap:16px}
+.grid-2{grid-template-columns:1fr 1fr}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+.field{display:flex;flex-direction:column;gap:6px}
+.field.full{grid-column:1/-1}
+label{font-size:13px;font-weight:600;color:var(--text-2)}
+label .req{color:var(--accent);margin-left:3px}
+label .hint{display:block;font-weight:400;color:var(--text-3);font-size:11.5px;margin-top:2px}
+input,select,textarea{
+  font-family:inherit;font-size:14px;color:var(--text);
+  background:var(--panel-bg-2);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:10px 12px;width:100%;transition:.15s;
+}
+textarea{resize:vertical;min-height:70px;line-height:1.5}
+input:focus,select:focus,textarea:focus{
+  outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(79,107,255,.18);
+}
+input::placeholder,textarea::placeholder{color:var(--text-3)}
+select{cursor:pointer}
+
+/* 折叠区 */
+details.collapse{border:1px solid var(--border);border-radius:var(--radius);background:var(--panel-bg);margin-bottom:18px;overflow:hidden}
+details.collapse > summary{
+  cursor:pointer;list-style:none;padding:18px 22px;font-weight:700;font-size:15px;
+  display:flex;align-items:center;gap:10px;user-select:none;
+}
+details.collapse > summary::-webkit-details-marker{display:none}
+details.collapse > summary .chev{margin-left:auto;transition:.2s;color:var(--text-3)}
+details.collapse[open] > summary .chev{transform:rotate(180deg)}
+details.collapse > summary:hover{background:var(--panel-bg-2)}
+.collapse-body{padding:0 22px 22px}
+.subgroup{margin-top:18px}
+.subgroup > h4{font-size:13px;color:var(--cyan);font-weight:700;margin-bottom:12px;padding-bottom:6px;border-bottom:1px dashed var(--border)}
+
+/* ============ 按钮 ============ */
+.btn{
+  appearance:none;font-family:inherit;cursor:pointer;font-weight:600;font-size:14px;
+  border-radius:var(--radius-sm);padding:11px 20px;border:1px solid transparent;transition:.15s;
+  display:inline-flex;align-items:center;gap:8px;
+}
+.btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;box-shadow:0 4px 14px rgba(79,107,255,.4)}
+.btn-primary:hover{filter:brightness(1.08)}
+.btn-ghost{background:var(--panel-bg-2);color:var(--text);border-color:var(--border)}
+.btn-ghost:hover{border-color:var(--primary)}
+.btn-accent{background:linear-gradient(135deg,var(--accent),#ffba6b);color:#3a1f00}
+.btn-accent:hover{filter:brightness(1.05)}
+.btn-danger{background:rgba(248,113,113,.12);color:var(--danger);border-color:rgba(248,113,113,.4)}
+.btn-danger:hover{background:rgba(248,113,113,.22)}
+.btn-sm{padding:7px 13px;font-size:12.5px}
+.form-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+
+/* ============ Tab2 列表/筛选 ============ */
+.toolbar{
+  display:flex;gap:12px;flex-wrap:wrap;align-items:center;
+  background:var(--panel-bg);border:1px solid var(--border);
+  border-radius:var(--radius);padding:14px 18px;margin-bottom:18px;
+}
+.toolbar .tb-field{display:flex;flex-direction:column;gap:3px}
+.toolbar label{font-size:11px;color:var(--text-3)}
+.toolbar select{padding:7px 10px;font-size:13px;min-width:130px}
+.toolbar .spacer{flex:1}
+
+.scn-list{display:grid;gap:14px}
+.scn-card{
+  background:var(--panel-bg);border:1px solid var(--border);border-radius:var(--radius);
+  padding:18px;display:flex;gap:16px;align-items:flex-start;cursor:pointer;transition:.15s;
+}
+.scn-card:hover{border-color:var(--primary);transform:translateY(-1px);box-shadow:var(--shadow)}
+.scn-card .main{flex:1;min-width:0}
+.scn-card .title-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.scn-card .name{font-size:16px;font-weight:700}
+.scn-card .meta{font-size:12px;color:var(--text-3);display:flex;gap:14px;flex-wrap:wrap;margin-top:8px}
+.scn-card .pain{font-size:13px;color:var(--text-2);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.scn-card .right{text-align:right;flex:0 0 auto;display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+.scn-card .score-big{font-size:26px;font-weight:800;line-height:1}
+.scn-card .score-big small{font-size:11px;color:var(--text-3);font-weight:500;display:block;margin-top:2px}
+
+/* 徽章 */
+.badge-pill{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap}
+.pill-P0{background:rgba(52,211,153,.16);color:var(--p0)}
+.pill-P1{background:rgba(79,107,255,.18);color:var(--primary-2)}
+.pill-P2{background:rgba(251,191,36,.16);color:var(--p2)}
+.pill-淘汰{background:rgba(148,163,184,.16);color:var(--drop)}
+.pill-待评{background:rgba(148,163,184,.14);color:var(--text-3)}
+.pill-red{background:rgba(248,113,113,.18);color:var(--danger)}
+.pill-stage{background:var(--panel-bg-2);color:var(--cyan);border:1px solid rgba(52,211,224,.3)}
+.pill-mod{background:var(--panel-bg-2);color:var(--text-2);border:1px solid var(--border)}
+
+.empty{text-align:center;padding:60px 20px;color:var(--text-3)}
+.empty .big{font-size:46px;margin-bottom:12px;opacity:.5}
+
+/* ============ 评审详情 ============ */
+.review-grid{display:grid;grid-template-columns:1fr 360px;gap:18px;align-items:start}
+.detail-header{display:flex;align-items:flex-start;gap:14px;margin-bottom:18px}
+.detail-header .h-main h2{font-size:21px}
+.detail-header .h-main .meta{font-size:12.5px;color:var(--text-3);margin-top:6px;display:flex;gap:16px;flex-wrap:wrap}
+
+.kv{display:grid;grid-template-columns:140px 1fr;gap:8px 14px;font-size:13.5px}
+.kv dt{color:var(--text-3)}
+.kv dd{color:var(--text)}
+
+/* 红线检查 */
+.check-item{display:flex;gap:11px;padding:11px 0;border-bottom:1px solid var(--border);align-items:flex-start}
+.check-item:last-child{border-bottom:none}
+.check-item input[type=checkbox]{width:18px;height:18px;flex:0 0 auto;margin-top:2px;accent-color:var(--danger);cursor:pointer}
+.check-item .txt{font-size:13.5px;color:var(--text-2)}
+.redline-alert{
+  background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.4);
+  border-radius:var(--radius-sm);padding:12px 16px;margin-top:14px;font-size:13.5px;color:var(--danger);
+  display:none;align-items:center;gap:10px;font-weight:600;
+}
+.redline-alert.show{display:flex}
+
+/* 四道门槛 */
+.gate-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border)}
+.gate-row:last-child{border-bottom:none}
+.gate-row .gate-name{flex:1;font-size:13.5px}
+.gate-row .gate-name small{display:block;color:var(--text-3);font-size:11.5px}
+.seg{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.seg button{
+  appearance:none;background:var(--panel-bg-2);border:none;color:var(--text-2);
+  font-family:inherit;font-size:12.5px;font-weight:600;padding:6px 14px;cursor:pointer;transition:.12s;
+}
+.seg button.on-yes{background:var(--ok);color:#04261a}
+.seg button.on-no{background:var(--danger);color:#2a0606}
+
+/* 四维评分 */
+.dim{padding:14px 0;border-bottom:1px solid var(--border)}
+.dim:last-child{border-bottom:none}
+.dim .dim-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.dim .dim-name{font-weight:700;font-size:14px}
+.dim .dim-weight{font-size:11px;color:var(--cyan);background:rgba(52,211,224,.1);padding:2px 8px;border-radius:6px;font-weight:700}
+.dim .dim-q{font-size:11.5px;color:var(--text-3);margin-left:auto;font-style:italic}
+.dim .slider-row{display:flex;align-items:center;gap:14px}
+.dim input[type=range]{flex:1;accent-color:var(--primary);cursor:pointer}
+.dim .scoreval{font-size:20px;font-weight:800;width:34px;text-align:center;color:var(--primary-2)}
+.dim .weighted{font-size:12px;color:var(--text-3);width:90px;text-align:right}
+.dim textarea{margin-top:8px;min-height:46px;font-size:12.5px}
+
+/* 综合得分面板 */
+.score-panel{
+  background:linear-gradient(135deg,#15213f,#1c2c54);
+  border:1px solid var(--border);border-radius:var(--radius);padding:20px;text-align:center;
+}
+.score-panel .total{font-size:52px;font-weight:800;line-height:1;background:linear-gradient(135deg,var(--primary-2),var(--cyan));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.score-panel .total-label{font-size:12px;color:var(--text-3);margin-bottom:6px}
+.score-panel .lvl{margin-top:14px}
+.score-panel .lvl .badge-pill{font-size:14px;padding:6px 18px}
+.score-panel .lvl-desc{font-size:12px;color:var(--text-3);margin-top:8px}
+
+/* 100分表 */
+.s100-row{display:grid;grid-template-columns:1fr 60px 110px;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)}
+.s100-row:last-of-type{border-bottom:none}
+.s100-row .n{font-size:13px}
+.s100-row .n small{color:var(--text-3);font-size:11px;display:block}
+.s100-row .mx{font-size:11px;color:var(--text-3);text-align:right}
+.s100-row input[type=number]{padding:6px 8px;text-align:center}
+.s100-total{display:flex;align-items:center;justify-content:space-between;margin-top:16px;padding:14px 18px;background:var(--panel-bg-2);border-radius:var(--radius-sm)}
+.s100-total .num{font-size:32px;font-weight:800}
+.s100-hint{font-size:12.5px;margin-top:10px;padding:10px 14px;border-radius:var(--radius-sm);font-weight:600}
+.s100-hint.t-prime{background:rgba(52,211,153,.12);color:var(--p0)}
+.s100-hint.t-pool{background:rgba(79,107,255,.14);color:var(--primary-2)}
+.s100-hint.t-out{background:rgba(148,163,184,.12);color:var(--text-2)}
+.veto-list{font-size:12px;color:var(--text-3);margin-top:12px;line-height:1.7}
+.veto-list b{color:var(--danger)}
+
+.sticky-side{position:sticky;top:120px}
+
+/* ============ Tab3 看板 ============ */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:20px}
+.stat{background:var(--panel-bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px}
+.stat .num{font-size:32px;font-weight:800;line-height:1}
+.stat .lbl{font-size:12.5px;color:var(--text-3);margin-top:6px}
+.stat.accent .num{color:var(--accent)}
+.stat.cyan .num{color:var(--cyan)}
+.stat.danger .num{color:var(--danger)}
+
+.board-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:18px;align-items:start}
+@media(max-width:920px){.board-grid{grid-template-columns:1fr}}
+
+/* 漏斗 */
+.funnel{display:flex;flex-direction:column;gap:8px;align-items:center}
+.funnel-step{
+  position:relative;border-radius:8px;padding:14px 18px;color:#fff;font-weight:700;
+  display:flex;justify-content:space-between;align-items:center;transition:.2s;min-height:54px;
+}
+.funnel-step .fs-name{font-size:14px}
+.funnel-step .fs-count{font-size:22px;font-weight:800}
+.funnel-step .fs-sub{font-size:11px;opacity:.8;font-weight:500}
+
+/* 优先级条形 */
+.bar-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.bar-row .bl{width:54px;font-size:13px;font-weight:600}
+.bar-track{flex:1;height:24px;background:var(--panel-bg-2);border-radius:6px;overflow:hidden}
+.bar-fill{height:100%;border-radius:6px;display:flex;align-items:center;padding-left:10px;color:#fff;font-size:12px;font-weight:700;transition:width .5s ease;min-width:fit-content}
+.bar-row .bv{width:34px;text-align:right;font-weight:700}
+
+/* 环形图 */
+.donut-wrap{display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.donut-legend{display:flex;flex-direction:column;gap:8px;font-size:13px}
+.donut-legend .li{display:flex;align-items:center;gap:8px}
+.donut-legend .dot{width:11px;height:11px;border-radius:3px;flex:0 0 auto}
+
+/* 模块分布 */
+.mod-bar{display:flex;align-items:center;gap:10px;margin-bottom:9px;font-size:12.5px}
+.mod-bar .mn{width:78px;color:var(--text-2)}
+.mod-bar .mt{flex:1;height:16px;background:var(--panel-bg-2);border-radius:5px;overflow:hidden}
+.mod-bar .mf{height:100%;background:linear-gradient(90deg,var(--primary),var(--cyan));border-radius:5px}
+.mod-bar .mv{width:24px;text-align:right;color:var(--text-3)}
+
+/* ============ Toast & Modal ============ */
+#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--panel-bg-2);border:1px solid var(--primary);color:var(--text);
+  padding:13px 24px;border-radius:10px;box-shadow:var(--shadow);font-size:14px;font-weight:600;
+  opacity:0;pointer-events:none;transition:.25s;z-index:200}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.err{border-color:var(--danger);color:var(--danger)}
+
+.modal-mask{position:fixed;inset:0;background:rgba(5,8,18,.7);backdrop-filter:blur(3px);z-index:150;
+  display:none;align-items:center;justify-content:center;padding:20px}
+.modal-mask.show{display:flex}
+.modal{background:var(--panel-bg);border:1px solid var(--border);border-radius:var(--radius);
+  padding:26px;max-width:420px;width:100%;box-shadow:var(--shadow)}
+.modal h3{font-size:17px;margin-bottom:10px}
+.modal p{color:var(--text-2);font-size:14px;margin-bottom:20px}
+.modal .acts{display:flex;gap:12px;justify-content:flex-end}
+
+/* 响应式 */
+@media(max-width:900px){
+  .grid-2,.grid-3{grid-template-columns:1fr}
+  .review-grid{grid-template-columns:1fr}
+  .sticky-side{position:static}
+  .board-grid{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+  .top{padding:12px 16px}.tabs{padding:0 16px}main{padding:20px 16px 70px}
+  .scn-card{flex-direction:column}.scn-card .right{flex-direction:row;align-items:center}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="top">
+    <div class="brand">
+      <div class="logo">金</div>
+      <div>
+        <h1>场景提交及评审系统</h1>
+        <p>金种子众包计划 · 制造业AI高ROI场景评估引擎</p>
+      </div>
+    </div>
+    <a class="back-link" href="FDE宣讲手册.html">← 返回宣讲手册</a>
+  </div>
+  <nav class="tabs">
+    <button class="tab active" data-view="submit">📝 场景提报</button>
+    <button class="tab" data-view="review">⚖️ 场景评审 <span class="badge" id="tabReviewCount">0</span></button>
+    <button class="tab" data-view="board">📊 评审漏斗看板</button>
+  </nav>
+</header>
+
+<main>
+  <!-- ============================== TAB 1：场景提报 ============================== -->
+  <section class="view active" id="view-submit">
+    <div class="section-head">
+      <h2>场景提报 <span class="tag-ref">手册 §12</span></h2>
+      <p class="sub">让顾问“愿意提、提得动”：先填10项轻量模板，深度场景卡在深度评估阶段补充。</p>
+    </div>
+
+    <form id="submitForm">
+      <!-- 12.1 轻量提报模板 -->
+      <div class="card">
+        <h3>① 轻量提报模板 <span class="tag-ref">§12.1 · 10项核心</span></h3>
+        <p class="card-desc">第一版控制在10项以内，复杂字段放到深度评估阶段。</p>
+        <div class="grid grid-2">
+          <div class="field">
+            <label>场景名称 <span class="req">*</span><span class="hint">一句话命名，例如“XX数智工程师”</span></label>
+            <input name="name" required placeholder="如：需求预测数智工程师">
+          </div>
+          <div class="field">
+            <label>所属模块/行业 <span class="req">*</span><span class="hint">便于归类与去重（§6.1）</span></label>
+            <select name="module" required>
+              <option value="">请选择模块</option>
+              <option>PP</option>
+              <option>MM/SCM</option>
+              <option>SD</option>
+              <option>FICO</option>
+              <option>QM</option>
+              <option>PM/EAM</option>
+              <option>WM/EWM</option>
+              <option>MDG</option>
+              <option>跨流程</option>
+            </select>
+          </div>
+          <div class="field full">
+            <label>业务痛点 <span class="req">*</span><span class="hint">当前瓶颈与代价</span></label>
+            <textarea name="pain" required placeholder="当前流程的瓶颈、损失、卡点……"></textarea>
+          </div>
+          <div class="field full">
+            <label>现状如何靠人解决 <span class="req">*</span><span class="hint">明确“经验依赖点”，这是价值核心</span></label>
+            <textarea name="manual" required placeholder="目前由谁、凭什么经验做这个决策……"></textarea>
+          </div>
+          <div class="field">
+            <label>决策频率与数量 <span class="req">*</span><span class="hint">判断价值放大倍数</span></label>
+            <input name="freq" required placeholder="如：每日多轮 / 每周50单">
+          </div>
+          <div class="field">
+            <label>可量化业务KPI <span class="req">*</span><span class="hint">改善后能落在哪个指标上</span></label>
+            <input name="kpi" required placeholder="如：OTD、库存周转天数、预测准确率">
+          </div>
+          <div class="field">
+            <label>数据基础 <span class="req">*</span><span class="hint">SAP中是否有所需数据，质量如何</span></label>
+            <input name="data" required placeholder="如：历史销量 + 主数据齐全">
+          </div>
+          <div class="field">
+            <label>客户付费意愿 <span class="req">*</span><span class="hint">客户是否痛、是否愿投入</span></label>
+            <select name="pay" required>
+              <option value="">请选择</option>
+              <option>高（有预算与Owner）</option>
+              <option>中（有意向待评估）</option>
+              <option>低（仅兴趣）</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>预估价值 <span class="req">*</span><span class="hint">粗略的降本/增效/增收/控险量级</span></label>
+            <input name="value" required placeholder="如：年化人力节省约200万 / 呆滞下降15%">
+          </div>
+          <div class="field">
+            <label>提报人 / 客户 <span class="req">*</span><span class="hint">便于跟进、署名和激励</span></label>
+            <input name="reporter" required placeholder="如：张伟 / XX汽车零部件">
+          </div>
+        </div>
+      </div>
+
+      <!-- 12.2 FDE深度场景卡（可折叠） -->
+      <details class="collapse">
+        <summary>② FDE深度场景卡（选填 · 深度评估阶段补充）<span class="tag-ref">§12.2</span><span class="chev">▾</span></summary>
+        <div class="collapse-body">
+          <div class="grid grid-2">
+            <div class="field"><label>客户 / 行业 / 工厂</label><input name="dc_customer" placeholder="如：XX汽车 / 汽车零部件 / 苏州厂"></div>
+            <div class="field"><label>业务Owner</label><input name="dc_owner" placeholder="如：供应链计划经理 李明"></div>
+            <div class="field"><label>相关SAP模块</label><input name="dc_sapmod" placeholder="如：MM/SCM、IBP"></div>
+            <div class="field"><label>相关外围系统</label><input name="dc_extsys" placeholder="如：MES、Excel、SRM"></div>
+          </div>
+
+          <div class="subgroup"><h4>一、业务痛点</h4>
+            <div class="grid grid-2">
+              <div class="field"><label>当前由谁做</label><input name="d_who"></div>
+              <div class="field"><label>每天/每周发生频率</label><input name="d_freq"></div>
+              <div class="field"><label>当前耗时/成本/损失</label><input name="d_cost"></div>
+              <div class="field"><label>当前为什么做不好</label><input name="d_whybad"></div>
+            </div>
+          </div>
+
+          <div class="subgroup"><h4>二、AI机会</h4>
+            <div class="grid grid-2">
+              <div class="field"><label>属于五类来源中的哪一类<span class="hint">§7：不该人做/做不好/做不起/无法达到/改变商业模式</span></label>
+                <select name="d_source">
+                  <option value="">请选择</option>
+                  <option>不应该由人做</option>
+                  <option>过去人做不好</option>
+                  <option>过去做不起</option>
+                  <option>过去无法达到</option>
+                  <option>改变商业模式及收费模式</option>
+                </select>
+              </div>
+              <div class="field"><label>AI要做的事情</label><input name="d_aido"></div>
+              <div class="field"><label>人保留的决策权</label><input name="d_humanctrl"></div>
+              <div class="field"><label>需要的模型/技术<span class="hint">LLM/RAG/预测/优化/多模态/Agent</span></label><input name="d_tech"></div>
+            </div>
+          </div>
+
+          <div class="subgroup"><h4>三、数据与系统</h4>
+            <div class="grid grid-2">
+              <div class="field"><label>SAP对象/表/接口</label><input name="d_sapobj"></div>
+              <div class="field"><label>外围数据</label><input name="d_extdata"></div>
+              <div class="field"><label>文档/图片/视频/传感器</label><input name="d_multimodal"></div>
+              <div class="field"><label>数据能否两周内拿到样本</label>
+                <select name="d_sample"><option value="">请选择</option><option>能</option><option>部分能</option><option>不能</option></select>
+              </div>
+            </div>
+          </div>
+
+          <div class="subgroup"><h4>四、闭环动作</h4>
+            <div class="grid grid-2">
+              <div class="field"><label>输出是什么</label><input name="d_output"></div>
+              <div class="field"><label>谁确认</label><input name="d_confirm"></div>
+              <div class="field"><label>写回哪里</label><input name="d_writeback"></div>
+              <div class="field"><label>如何审计与回滚</label><input name="d_audit"></div>
+            </div>
+          </div>
+
+          <div class="subgroup"><h4>五、ROI</h4>
+            <div class="grid grid-2">
+              <div class="field"><label>基线指标</label><input name="d_baseline"></div>
+              <div class="field"><label>目标指标</label><input name="d_target"></div>
+              <div class="field"><label>估算收益</label><input name="d_benefit"></div>
+              <div class="field"><label>付费模式<span class="hint">订阅/成果分成/场景包/托管运营</span></label><input name="d_pricing"></div>
+            </div>
+          </div>
+
+          <div class="subgroup"><h4>六、3个月验证计划</h4>
+            <div class="grid grid-2">
+              <div class="field"><label>第1-2周</label><input name="d_w12" placeholder="拿到最小数据样本"></div>
+              <div class="field"><label>第3-4周</label><input name="d_w34" placeholder="完成可演示原型"></div>
+              <div class="field"><label>第5-8周</label><input name="d_w58" placeholder="接入真实/沙箱流程"></div>
+              <div class="field"><label>第9-12周</label><input name="d_w912" placeholder="业务指标对比"></div>
+            </div>
+          </div>
+
+          <div class="subgroup"><h4>七、风险</h4>
+            <div class="grid grid-2">
+              <div class="field"><label>合规风险</label><input name="d_riskcomp"></div>
+              <div class="field"><label>数据风险</label><input name="d_riskdata"></div>
+              <div class="field"><label>组织采纳风险</label><input name="d_riskadopt"></div>
+              <div class="field"><label>技术不确定性</label><input name="d_risktech"></div>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">✓ 提交场景（状态：待初筛）</button>
+        <button type="button" class="btn btn-accent" id="loadSampleBtn">↻ 载入示例场景</button>
+        <button type="reset" class="btn btn-ghost">清空表单</button>
+        <input type="hidden" name="editId">
+      </div>
+    </form>
+  </section>
+
+  <!-- ============================== TAB 2：场景评审 ============================== -->
+  <section class="view" id="view-review">
+    <!-- 列表 -->
+    <div id="reviewList">
+      <div class="section-head">
+        <h2>场景评审 <span class="tag-ref">手册 §9 · §10</span></h2>
+        <p class="sub">评审委员会视角：红线检查 → 四道硬门槛 → 四维加权评分 → 100分细颗粒评分。</p>
+      </div>
+      <div class="toolbar">
+        <div class="tb-field"><label>状态</label>
+          <select id="fltStatus"><option value="">全部状态</option><option>待初筛</option><option>已初筛</option></select>
+        </div>
+        <div class="tb-field"><label>模块</label>
+          <select id="fltModule"><option value="">全部模块</option></select>
+        </div>
+        <div class="tb-field"><label>优先级</label>
+          <select id="fltPrio"><option value="">全部优先级</option><option>P0</option><option>P1</option><option>P2</option><option>淘汰</option></select>
+        </div>
+        <div class="tb-field"><label>排序</label>
+          <select id="fltSort">
+            <option value="score">按综合得分（高→低）</option>
+            <option value="s100">按100分得分（高→低）</option>
+            <option value="time">按提报时间（新→旧）</option>
+          </select>
+        </div>
+        <div class="spacer"></div>
+      </div>
+      <div class="scn-list" id="scnList"></div>
+    </div>
+
+    <!-- 评审详情 -->
+    <div id="reviewDetail" style="display:none"></div>
+  </section>
+
+  <!-- ============================== TAB 3：评审漏斗看板 ============================== -->
+  <section class="view" id="view-board">
+    <div class="section-head">
+      <h2>评审漏斗看板 <span class="tag-ref">手册 §13.3</span></h2>
+      <p class="sub">管理视角：评估漏斗各环节统计、优先级分布、红线与模块分布。</p>
+    </div>
+
+    <div class="stat-grid" id="statGrid"></div>
+
+    <div class="board-grid">
+      <div class="card">
+        <h3>🔻 评估漏斗 <span class="tag-ref">§13.3</span></h3>
+        <p class="card-desc">提报 → 初筛 → 深度评估 → POC共创 → 产品化</p>
+        <div class="funnel" id="funnel"></div>
+      </div>
+
+      <div>
+        <div class="card">
+          <h3>🎯 优先级分布 <span class="tag-ref">§10.1</span></h3>
+          <p class="card-desc">P0(≥4.0) / P1(3.0-3.9) / P2(2.0-2.9) / 淘汰(&lt;2.0)</p>
+          <div id="prioBars"></div>
+        </div>
+        <div class="card">
+          <h3>🍩 状态构成</h3>
+          <div class="donut-wrap">
+            <div id="donut"></div>
+            <div class="donut-legend" id="donutLegend"></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>🧩 按模块分布</h3>
+          <div id="modBars"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>💾 数据备份与迁移</h3>
+      <p class="card-desc">导出全部场景数据为 JSON 文件用于备份，或导入 JSON 还原/迁移数据。</p>
+      <div class="form-actions">
+        <button class="btn btn-ghost" id="exportBtn">⬇ 导出 JSON</button>
+        <button class="btn btn-ghost" id="importBtn">⬆ 导入 JSON</button>
+        <input type="file" id="importFile" accept="application/json,.json" style="display:none">
+        <button class="btn btn-danger" id="clearAllBtn">🗑 清空全部数据</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="toast"></div>
+<div class="modal-mask" id="modalMask">
+  <div class="modal">
+    <h3 id="modalTitle">确认</h3>
+    <p id="modalBody"></p>
+    <div class="acts">
+      <button class="btn btn-ghost btn-sm" id="modalCancel">取消</button>
+      <button class="btn btn-danger btn-sm" id="modalConfirm">确认</button>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* =====================================================================
+   场景提交及评审系统 —— 纯前端，localStorage 持久化
+   数据口径全部忠实手册 §9 / §10.1 / §10.4 / §12 / §13.3
+   ===================================================================== */
+
+/* ---------- 常量：评分口径（忠实手册，勿改） ---------- */
+// §10.1 四维加权模型
+const DIMENSIONS = [
+  {key:'biz',  name:'业务价值',  weight:0.40, q:'做成了能值多少钱？客户多想要？'},
+  {key:'tech', name:'技术可行性',weight:0.25, q:'数据够不够？AI接得住吗？'},
+  {key:'repl', name:'可复制性',  weight:0.20, q:'能不能从一个客户复制到一百个？'},
+  {key:'strat',name:'战略契合',  weight:0.15, q:'对公司战略与护城河有多大意义？'}
+];
+// §10.4 100分细颗粒评分表（权重即满分）
+const SCALE100 = [
+  {key:'s_biz',  name:'业务价值',  max:20, tip:'是否直接影响收入、交付、库存、质量、成本、现金流、停机时间'},
+  {key:'s_freq', name:'发生频率',  max:10, tip:'是否高频、重复、跨部门消耗大量时间'},
+  {key:'s_pain', name:'当前痛苦程度',max:10,tip:'人做不动、做不好、做不起或过去无法达到'},
+  {key:'s_fit',  name:'AI适配度',  max:15, tip:'是否适合LLM/RAG/预测/优化/多模态/Agent'},
+  {key:'s_data', name:'数据可得性',max:15, tip:'两周内能否拿到样本'},
+  {key:'s_loop', name:'闭环可行性',max:10, tip:'是否能形成建议、审批、工单、系统写回、看板跟踪'},
+  {key:'s_std',  name:'标准化潜力',max:10, tip:'是否能复制到同类客户、工厂、模块'},
+  {key:'s_risk', name:'风险可控',  max:5,  tip:'是否避开合规、安全、隐私、责任红线'},
+  {key:'s_pay',  name:'客户付费意愿',max:5, tip:'是否有明确预算、Owner和收益归属'}
+];
+// §9.1 五条红线
+const REDLINES = [
+  '涉及违法违规、侵犯隐私、泄露商业秘密或客户数据跨域流转不可控',
+  '安全关键动作完全自动化且没有人工确认（设备危险操作、EHS高风险、付款放行、法律承诺）',
+  'AI直接替代法定审批责任人，导致责任无法追溯',
+  '使用未经授权的数据、图纸、客户合同、供应商报价、个人信息',
+  '输出不可解释但影响重大经营决策，且没有评价、审计、回滚机制'
+];
+// §9 四道硬门槛
+const GATES = [
+  {key:'g_red',  name:'不碰红线',          sub:'§9.1'},
+  {key:'g_loop', name:'3个月内技术闭环',   sub:'§9.2'},
+  {key:'g_freq', name:'高频',              sub:'§9.3'},
+  {key:'g_std',  name:'可标准化和泛化',     sub:'§9.4'}
+];
+// §13.3 评估漏斗环节
+const FUNNEL_STAGES = [
+  {key:'提报',     color:'#4f6bff', sub:'随时 · 模板完整'},
+  {key:'初筛',     color:'#5d7bff', sub:'7个工作日 · 四维≥P1'},
+  {key:'深度评估', color:'#34d3e0', sub:'双周 · 数据可行+ROI可信'},
+  {key:'POC共创',  color:'#ff9d42', sub:'2-6周 · ROI验证达标'},
+  {key:'产品化',   color:'#34d399', sub:'持续 · 可复制可交付'}
+];
+const STORE_KEY = 'fde_scenarios';
+
+/* ---------- 存储层 ---------- */
+function loadAll(){
+  try{ return JSON.parse(localStorage.getItem(STORE_KEY)) || []; }
+  catch(e){ return []; }
+}
+function saveAll(list){ localStorage.setItem(STORE_KEY, JSON.stringify(list)); }
+function getById(id){ return loadAll().find(s=>s.id===id); }
+function upsert(scn){
+  const list = loadAll();
+  const i = list.findIndex(s=>s.id===scn.id);
+  if(i>=0) list[i]=scn; else list.unshift(scn);
+  saveAll(list);
+}
+function removeById(id){ saveAll(loadAll().filter(s=>s.id!==id)); }
+function uid(){ return 'S'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+
+/* ---------- 评分计算（纯函数） ---------- */
+// 四维加权综合得分（保留两位）
+function calcWeighted(scores){
+  let t=0;
+  DIMENSIONS.forEach(d=>{ t += (Number(scores?.[d.key])||0) * d.weight; });
+  return Math.round(t*100)/100;
+}
+// §10.1 分级
+function gradeOf(total){
+  if(total>=4.0) return 'P0';
+  if(total>=3.0) return 'P1';
+  if(total>=2.0) return 'P2';
+  return '淘汰';
+}
+function gradeDesc(g){
+  return {
+    'P0':'优先立项POC，配置最强资源',
+    'P1':'进入深度评估，补充数据后排期',
+    'P2':'入库观察，待条件成熟或合并',
+    '淘汰':'反馈提报人原因，沉淀为经验'
+  }[g] || '';
+}
+// 100分总分
+function calc100(s100){
+  let t=0; SCALE100.forEach(d=>{ t += Number(s100?.[d.key])||0; }); return t;
+}
+// 导入合并：以 id 去重，arr 中同 id 覆盖 cur，新 id 追加（纯函数，便于测试）
+function mergeImport(cur, arr){
+  const map = new Map((cur||[]).map(s=>[s.id,s]));
+  (arr||[]).forEach(s=>{ if(s && s.id) map.set(s.id, s); });
+  return [...map.values()];
+}
+
+/* ---------- 数据模型工厂 ---------- */
+function newScenario(){
+  return {
+    id:uid(),
+    submittedAt:Date.now(),
+    reviewedAt:null,
+    status:'待初筛',          // 待初筛 / 已初筛
+    stage:'提报',             // 漏斗阶段
+    // 12.1 + 12.2 字段
+    fields:{},
+    // §9.1 红线（布尔数组）
+    redlines:[false,false,false,false,false],
+    redlineHit:false,
+    // §9 四道门槛 yes/no/null
+    gates:{},
+    // §10.1 四维评分 & 理由
+    scores:{biz:3,tech:3,repl:3,strat:3},
+    reasons:{},
+    weightedTotal:null,
+    grade:'待评',
+    // §10.4 100分
+    score100:{},
+    total100:null,
+    // 评审意见
+    reviewer:'',
+    comment:''
+  };
+}
+
+/* ---------- 工具 ---------- */
+const $ = (s,r=document)=>r.querySelector(s);
+const $$ = (s,r=document)=>[...r.querySelectorAll(s)];
+function esc(t){ return String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function fmtDate(ts){ if(!ts) return '—'; const d=new Date(ts);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+let toastTimer;
+function toast(msg,err){ const t=$('#toast'); t.textContent=msg; t.className='show'+(err?' err':'');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.className='',2400); }
+
+/* 自定义确认弹窗 */
+let modalResolve=null;
+function confirmModal(title,body){
+  $('#modalTitle').textContent=title; $('#modalBody').textContent=body;
+  $('#modalMask').classList.add('show');
+  return new Promise(res=>{ modalResolve=res; });
+}
+$('#modalCancel').onclick=()=>{ $('#modalMask').classList.remove('show'); modalResolve&&modalResolve(false); };
+$('#modalConfirm').onclick=()=>{ $('#modalMask').classList.remove('show'); modalResolve&&modalResolve(true); };
+
+/* ====================================================================
+   TAB 切换
+   ==================================================================== */
+function switchView(v){
+  $$('.tab').forEach(t=>t.classList.toggle('active', t.dataset.view===v));
+  $$('.view').forEach(el=>el.classList.toggle('active', el.id==='view-'+v));
+  if(v==='review'){ showReviewList(); renderReviewList(); }
+  if(v==='board') renderBoard();
+}
+$$('.tab').forEach(t=>t.onclick=()=>switchView(t.dataset.view));
+
+/* ====================================================================
+   TAB 1：提报表单
+   ==================================================================== */
+const submitForm = $('#submitForm');
+submitForm.addEventListener('submit', e=>{
+  e.preventDefault();
+  const fd = new FormData(submitForm);
+  const editId = fd.get('editId');
+  // 必填校验由 required 处理；这里收集字段
+  const fields={};
+  for(const [k,v] of fd.entries()){ if(k!=='editId') fields[k]=v.trim(); }
+
+  let scn;
+  if(editId){ scn = getById(editId) || newScenario(); scn.fields = fields; }
+  else { scn = newScenario(); scn.fields = fields; }
+  upsert(scn);
+  submitForm.reset();
+  submitForm.querySelector('[name=editId]').value='';
+  toast('✓ 场景已提报，状态：待初筛');
+  updateCounts();
+  switchView('review');
+});
+
+/* 载入示例：需求预测数智工程师（取自手册 §10.3 / §11.1 / §11.2） */
+$('#loadSampleBtn').onclick=()=>{
+  const f = submitForm;
+  const set=(n,v)=>{ const el=f.elements[n]; if(el) el.value=v; };
+  // 12.1
+  set('name','需求预测数智工程师');
+  set('module','MM/SCM');
+  set('pain','需求预测长期靠计划员经验拍脑袋，准确率低，导致呆滞与缺货并存，旺季缺货丢单、淡季积压占用现金。');
+  set('manual','由资深需求计划员凭历史经验、促销节奏和客户口头信息手工在Excel中调整预测，强依赖个人经验，新人难以接手。');
+  set('freq','每月滚动预测 + 每周修正，覆盖约800个SKU。');
+  set('kpi','预测准确率(MAPE)、缺货率、库存周转天数。');
+  set('data','SAP中历史销量、订单、主数据齐全，IBP有部分预测基线，数据质量可用。');
+  set('pay','高（有预算与Owner）');
+  set('value','呆滞库存下降约15%，缺货率下降，预计年化收益数百万级。');
+  set('reporter','张伟 / XX汽车零部件');
+  // 12.2 深度卡
+  const d={
+    dc_customer:'XX汽车零部件 / 汽车零部件 / 苏州工厂',
+    dc_owner:'供应链计划经理 李明',
+    dc_sapmod:'MM/SCM、IBP', dc_extsys:'Excel、CRM、MES',
+    d_who:'资深需求计划员（2人）', d_freq:'每月滚动 + 每周修正',
+    d_cost:'每月约8人天，且准确率波动大', d_whybad:'变量多（促销/季节/客户项目/替代料），靠人难以同时权衡',
+    d_source:'过去人做不好', d_aido:'时序预测 + 解释，输出各SKU预测值与置信区间',
+    d_humanctrl:'计划员审核并对异常SKU人工修正', d_tech:'时序预测模型 + 解释Agent(LLM)',
+    d_sapobj:'VBAK/VBAP销售订单、物料主数据、历史消耗', d_extdata:'促销计划、客户预测',
+    d_multimodal:'无', d_sample:'能',
+    d_output:'下月各SKU预测建议 + 异常解释', d_confirm:'需求计划经理', d_writeback:'写回IBP预测版本',
+    d_audit:'保留版本快照，可对比回滚，预测偏差留痕',
+    d_baseline:'当前MAPE基线', d_target:'MAPE下降10个百分点', d_benefit:'呆滞下降15%、缺货率下降', d_pricing:'按成果分成 + 订阅',
+    d_w12:'拿到1个产品族历史数据样本', d_w34:'完成预测原型并盲评', d_w58:'接入IBP沙箱，人工确认闭环', d_w912:'与人工预测前后对比业务KPI',
+    d_riskcomp:'数据脱敏，无合规红线', d_riskdata:'部分新品历史不足', d_riskadopt:'计划员习惯Excel，需培训', d_risktech:'促销突变下预测不确定'
+  };
+  Object.entries(d).forEach(([k,v])=>set(k,v));
+  f.querySelector('details.collapse').open=true;
+  toast('已载入示例：需求预测数智工程师');
+  window.scrollTo({top:0,behavior:'smooth'});
+};
+
+/* ====================================================================
+   TAB 2：评审列表
+   ==================================================================== */
+function showReviewList(){ $('#reviewList').style.display='block'; $('#reviewDetail').style.display='none'; }
+function showReviewDetail(){ $('#reviewList').style.display='none'; $('#reviewDetail').style.display='block'; }
+
+function populateModuleFilter(){
+  const sel=$('#fltModule'); const cur=sel.value;
+  const mods=[...new Set(loadAll().map(s=>s.fields.module).filter(Boolean))];
+  sel.innerHTML='<option value="">全部模块</option>'+mods.map(m=>`<option>${esc(m)}</option>`).join('');
+  sel.value=cur;
+}
+
+function renderReviewList(){
+  populateModuleFilter();
+  let list = loadAll();
+  const fS=$('#fltStatus').value, fM=$('#fltModule').value, fP=$('#fltPrio').value, sort=$('#fltSort').value;
+  if(fS) list=list.filter(s=>s.status===fS);
+  if(fM) list=list.filter(s=>s.fields.module===fM);
+  if(fP) list=list.filter(s=>s.grade===fP);
+  list.sort((a,b)=>{
+    if(sort==='time') return b.submittedAt-a.submittedAt;
+    if(sort==='s100') return (b.total100??-1)-(a.total100??-1);
+    return (b.weightedTotal??-1)-(a.weightedTotal??-1); // score
+  });
+
+  const el=$('#scnList');
+  if(!list.length){
+    el.innerHTML=`<div class="empty"><div class="big">📭</div><div>暂无符合条件的场景。去“场景提报”载入示例或新建一条吧。</div></div>`;
+    return;
+  }
+  el.innerHTML=list.map(s=>{
+    const g=s.grade, scoreTxt = s.weightedTotal!=null ? s.weightedTotal.toFixed(2) : '—';
+    const prioPill = g==='待评' ? `<span class="badge-pill pill-待评">待评分</span>` : `<span class="badge-pill pill-${g}">${g}</span>`;
+    return `<div class="scn-card" data-id="${s.id}">
+      <div class="main">
+        <div class="title-row">
+          <span class="name">${esc(s.fields.name||'未命名场景')}</span>
+          ${prioPill}
+          ${s.redlineHit?`<span class="badge-pill pill-red">⛔ 触碰红线</span>`:''}
+          <span class="badge-pill pill-mod">${esc(s.fields.module||'—')}</span>
+          <span class="badge-pill pill-stage">${esc(s.stage)}</span>
+        </div>
+        <div class="pain">${esc(s.fields.pain||'（无痛点描述）')}</div>
+        <div class="meta">
+          <span>👤 ${esc(s.fields.reporter||'—')}</span>
+          <span>📅 ${fmtDate(s.submittedAt)}</span>
+          <span>状态：${esc(s.status)}</span>
+          ${s.total100!=null?`<span>100分制：${s.total100}</span>`:''}
+        </div>
+      </div>
+      <div class="right">
+        <div><div class="score-big" style="color:${scoreColor(g)}">${scoreTxt}</div><small>综合得分</small></div>
+        <button class="btn btn-primary btn-sm act-review">评审 →</button>
+      </div>
+    </div>`;
+  }).join('');
+  $$('.scn-card',el).forEach(c=>{
+    c.onclick=()=>openReview(c.dataset.id);
+  });
+}
+function scoreColor(g){ return {P0:'var(--p0)',P1:'var(--primary-2)',P2:'var(--p2)','淘汰':'var(--drop)','待评':'var(--text-3)'}[g]; }
+['fltStatus','fltModule','fltPrio','fltSort'].forEach(id=>$('#'+id).addEventListener('change',renderReviewList));
+
+/* ====================================================================
+   TAB 2：评审详情
+   ==================================================================== */
+let curId=null;
+function openReview(id){
+  const s=getById(id); if(!s) return;
+  curId=id;
+  // 确保结构完整
+  s.scores = s.scores || {biz:3,tech:3,repl:3,strat:3};
+  s.redlines = s.redlines || [false,false,false,false,false];
+  s.gates = s.gates || {};
+  s.reasons = s.reasons || {};
+  s.score100 = s.score100 || {};
+
+  const f=s.fields;
+  const detail=$('#reviewDetail');
+  detail.innerHTML = `
+    <button class="btn btn-ghost btn-sm" id="backToList" style="margin-bottom:16px">← 返回列表</button>
+    <div class="detail-header">
+      <div class="logo" style="width:48px;height:48px;font-size:20px">${esc((f.name||'?').slice(0,1))}</div>
+      <div class="h-main">
+        <h2>${esc(f.name||'未命名场景')}</h2>
+        <div class="meta">
+          <span>🧩 ${esc(f.module||'—')}</span>
+          <span>👤 ${esc(f.reporter||'—')}</span>
+          <span>📅 提报 ${fmtDate(s.submittedAt)}</span>
+          <span>状态：${esc(s.status)}</span>
+          <span>漏斗：${esc(s.stage)}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="review-grid">
+      <div class="left-col">
+        <!-- 提报内容 -->
+        <div class="card">
+          <h3>📋 提报内容 <span class="tag-ref">§12.1</span></h3>
+          <dl class="kv">
+            <dt>业务痛点</dt><dd>${esc(f.pain)||'—'}</dd>
+            <dt>靠人解决</dt><dd>${esc(f.manual)||'—'}</dd>
+            <dt>决策频率</dt><dd>${esc(f.freq)||'—'}</dd>
+            <dt>可量化KPI</dt><dd>${esc(f.kpi)||'—'}</dd>
+            <dt>数据基础</dt><dd>${esc(f.data)||'—'}</dd>
+            <dt>付费意愿</dt><dd>${esc(f.pay)||'—'}</dd>
+            <dt>预估价值</dt><dd>${esc(f.value)||'—'}</dd>
+          </dl>
+          ${renderDeepCard(f)}
+        </div>
+
+        <!-- 红线检查 -->
+        <div class="card">
+          <h3>⛔ 红线检查 <span class="tag-ref">§9.1 · 一票否决</span></h3>
+          <p class="card-desc">任一红线命中即标记“触碰红线”，可一票否决。</p>
+          <div id="redlineBox">
+            ${REDLINES.map((r,i)=>`<label class="check-item">
+              <input type="checkbox" data-rl="${i}" ${s.redlines[i]?'checked':''}>
+              <span class="txt">${esc(r)}</span></label>`).join('')}
+          </div>
+          <div class="redline-alert ${s.redlineHit?'show':''}" id="redlineAlert">⛔ 已触碰红线 — 建议一票否决，反馈提报人。</div>
+        </div>
+
+        <!-- 四道门槛 -->
+        <div class="card">
+          <h3>🚪 四道硬门槛 <span class="tag-ref">§9</span></h3>
+          <p class="card-desc">必须同时通过四道门，才值得进入FDE漏斗。</p>
+          ${GATES.map(g=>`<div class="gate-row">
+            <div class="gate-name">${g.name}<small>${g.sub}</small></div>
+            <div class="seg" data-gate="${g.key}">
+              <button type="button" data-val="yes" class="${s.gates[g.key]==='yes'?'on-yes':''}">通过</button>
+              <button type="button" data-val="no" class="${s.gates[g.key]==='no'?'on-no':''}">不通过</button>
+            </div>
+          </div>`).join('')}
+        </div>
+
+        <!-- 四维加权评分 -->
+        <div class="card">
+          <h3>📐 第一阶段：四维加权评分 <span class="tag-ref">§10.1</span></h3>
+          <p class="card-desc">每项1-5分，综合得分 = Σ(得分×权重)，实时分级。</p>
+          ${DIMENSIONS.map(d=>{
+            const v=Number(s.scores[d.key])||3;
+            return `<div class="dim" data-dim="${d.key}">
+              <div class="dim-top">
+                <span class="dim-name">${d.name}</span>
+                <span class="dim-weight">${Math.round(d.weight*100)}%</span>
+                <span class="dim-q">${d.q}</span>
+              </div>
+              <div class="slider-row">
+                <input type="range" min="1" max="5" step="1" value="${v}" data-dimkey="${d.key}">
+                <span class="scoreval" id="sv-${d.key}">${v}</span>
+                <span class="weighted" id="wt-${d.key}">加权 ${(v*d.weight).toFixed(2)}</span>
+              </div>
+              <textarea data-reason="${d.key}" placeholder="${d.name}评分理由（选填）">${esc(s.reasons[d.key]||'')}</textarea>
+            </div>`;
+          }).join('')}
+        </div>
+
+        <!-- 100分细颗粒 -->
+        <details class="collapse" ${s.total100!=null?'open':''}>
+          <summary>📊 第二阶段：100分细颗粒评分（可选）<span class="tag-ref">§10.4</span><span class="chev">▾</span></summary>
+          <div class="collapse-body">
+            <div id="s100box">
+              ${SCALE100.map(d=>`<div class="s100-row">
+                <div class="n">${d.name}<small>${d.tip}</small></div>
+                <input type="number" min="0" max="${d.max}" step="1" value="${s.score100[d.key]??''}" data-s100="${d.key}" placeholder="0">
+                <div class="mx">满分 ${d.max}</div>
+              </div>`).join('')}
+            </div>
+            <div class="s100-total">
+              <span>100分制总分</span>
+              <span class="num" id="s100total">${s.total100??0}</span>
+            </div>
+            <div class="s100-hint" id="s100hint"></div>
+            <div class="veto-list">
+              <b>否决项（命中任一不予立项）：</b>无业务Owner · 数据三个月内无法获得 · 只能做演示无法进入真实流程 · ROI无法定义 · 安全或合规不可控
+            </div>
+          </div>
+        </details>
+
+        <!-- 评审意见 -->
+        <div class="card">
+          <h3>📝 评审意见</h3>
+          <div class="grid grid-2">
+            <div class="field"><label>评审人</label><input id="reviewerInput" value="${esc(s.reviewer||'')}" placeholder="如：评审委员会 王芳"></div>
+            <div class="field"><label>漏斗阶段</label>
+              <select id="stageSelect">${FUNNEL_STAGES.map(st=>`<option ${s.stage===st.key?'selected':''}>${st.key}</option>`).join('')}</select>
+            </div>
+            <div class="field full"><label>评审意见</label><textarea id="commentInput" placeholder="评审结论、改进建议、立项意见……">${esc(s.comment||'')}</textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 侧栏：实时综合得分 -->
+      <div class="sticky-side">
+        <div class="score-panel">
+          <div class="total-label">综合得分（四维加权）</div>
+          <div class="total" id="liveTotal">0.00</div>
+          <div class="lvl"><span class="badge-pill" id="liveGrade">—</span></div>
+          <div class="lvl-desc" id="liveGradeDesc"></div>
+        </div>
+        <div class="card" style="margin-top:18px">
+          <div class="form-actions" style="margin:0;flex-direction:column">
+            <button class="btn btn-primary" id="saveReviewBtn" style="width:100%">✓ 保存评审（更新状态）</button>
+            <button class="btn btn-ghost btn-sm" id="editScnBtn" style="width:100%">✎ 编辑提报内容</button>
+            <button class="btn btn-danger btn-sm" id="delScnBtn" style="width:100%">🗑 删除此场景</button>
+          </div>
+          <p class="card-desc" style="margin:14px 0 0">保存后状态更新为「已初筛(${'{P0/P1/P2/淘汰}'})」。</p>
+        </div>
+      </div>
+    </div>`;
+
+  showReviewDetail();
+  window.scrollTo({top:0,behavior:'smooth'});
+  bindReviewEvents(s);
+  recalcLive(); // 初始化侧栏 & 100分提示
+}
+
+function renderDeepCard(f){
+  // 仅当填了任意深度字段时展示
+  const deepKeys=['dc_customer','dc_owner','dc_sapmod','dc_extsys','d_who','d_freq','d_cost','d_whybad',
+    'd_source','d_aido','d_humanctrl','d_tech','d_sapobj','d_extdata','d_multimodal','d_sample',
+    'd_output','d_confirm','d_writeback','d_audit','d_baseline','d_target','d_benefit','d_pricing',
+    'd_w12','d_w34','d_w58','d_w912','d_riskcomp','d_riskdata','d_riskadopt','d_risktech'];
+  if(!deepKeys.some(k=>f[k])) return '';
+  const row=(label,key)=> f[key]?`<dt>${label}</dt><dd>${esc(f[key])}</dd>`:'';
+  return `<div style="margin-top:18px;padding-top:16px;border-top:1px dashed var(--border)">
+    <h3 style="font-size:13px;color:var(--cyan);margin-bottom:12px">🔬 FDE深度场景卡 <span class="tag-ref">§12.2</span></h3>
+    <dl class="kv">
+      ${row('客户/行业/工厂','dc_customer')}${row('业务Owner','dc_owner')}
+      ${row('SAP模块','dc_sapmod')}${row('外围系统','dc_extsys')}
+      ${row('当前由谁做','d_who')}${row('频率','d_freq')}${row('耗时/损失','d_cost')}${row('为什么做不好','d_whybad')}
+      ${row('五类来源','d_source')}${row('AI要做','d_aido')}${row('人保留决策权','d_humanctrl')}${row('模型/技术','d_tech')}
+      ${row('SAP对象/接口','d_sapobj')}${row('外围数据','d_extdata')}${row('多模态','d_multimodal')}${row('两周拿样本','d_sample')}
+      ${row('输出','d_output')}${row('谁确认','d_confirm')}${row('写回','d_writeback')}${row('审计回滚','d_audit')}
+      ${row('基线指标','d_baseline')}${row('目标指标','d_target')}${row('估算收益','d_benefit')}${row('付费模式','d_pricing')}
+      ${row('第1-2周','d_w12')}${row('第3-4周','d_w34')}${row('第5-8周','d_w58')}${row('第9-12周','d_w912')}
+      ${row('合规风险','d_riskcomp')}${row('数据风险','d_riskdata')}${row('采纳风险','d_riskadopt')}${row('技术不确定','d_risktech')}
+    </dl></div>`;
+}
+
+/* ---- 评审详情交互绑定 ---- */
+function bindReviewEvents(s){
+  $('#backToList').onclick=()=>{ showReviewList(); renderReviewList(); };
+
+  // 红线
+  $$('#redlineBox input[type=checkbox]').forEach(cb=>{
+    cb.onchange=()=>{
+      const hit = $$('#redlineBox input[type=checkbox]').some(x=>x.checked);
+      $('#redlineAlert').classList.toggle('show',hit);
+    };
+  });
+
+  // 四道门槛 segmented
+  $$('.seg').forEach(seg=>{
+    seg.querySelectorAll('button').forEach(b=>{
+      b.onclick=()=>{
+        seg.querySelectorAll('button').forEach(x=>x.classList.remove('on-yes','on-no'));
+        b.classList.add(b.dataset.val==='yes'?'on-yes':'on-no');
+        seg.dataset.value=b.dataset.val;
+      };
+    });
+    // 预置
+    const g=seg.dataset.gate; if(s.gates[g]) seg.dataset.value=s.gates[g];
+  });
+
+  // 四维滑块 → 实时
+  $$('input[data-dimkey]').forEach(sl=>{
+    sl.addEventListener('input',()=>{
+      const k=sl.dataset.dimkey, v=Number(sl.value), d=DIMENSIONS.find(x=>x.key===k);
+      $('#sv-'+k).textContent=v;
+      $('#wt-'+k).textContent='加权 '+(v*d.weight).toFixed(2);
+      recalcLive();
+    });
+  });
+
+  // 100分 → 实时
+  $$('input[data-s100]').forEach(inp=>{
+    inp.addEventListener('input',()=>{
+      const max=SCALE100.find(x=>x.key===inp.dataset.s100).max;
+      let v=Number(inp.value); if(v>max){v=max;inp.value=max;} if(v<0){v=0;inp.value=0;}
+      recalc100();
+    });
+  });
+
+  $('#saveReviewBtn').onclick=()=>saveReview();
+  $('#editScnBtn').onclick=()=>editScenario(curId);
+  $('#delScnBtn').onclick=async()=>{
+    const ok=await confirmModal('删除场景','确定删除该场景？此操作不可撤销。');
+    if(ok){ removeById(curId); toast('已删除场景'); updateCounts(); showReviewList(); renderReviewList(); }
+  };
+}
+
+/* 实时综合得分 + 分级 */
+function recalcLive(){
+  const scores={};
+  $$('input[data-dimkey]').forEach(sl=>scores[sl.dataset.dimkey]=Number(sl.value));
+  const total=calcWeighted(scores);
+  const g=gradeOf(total);
+  $('#liveTotal').textContent=total.toFixed(2);
+  const gb=$('#liveGrade');
+  gb.textContent=g; gb.className='badge-pill pill-'+g;
+  $('#liveGradeDesc').textContent=gradeDesc(g);
+}
+/* 实时100分总分 + 阈值提示 */
+function recalc100(){
+  const s100={};
+  $$('input[data-s100]').forEach(inp=>{ if(inp.value!=='') s100[inp.dataset.s100]=Number(inp.value); });
+  const t=calc100(s100);
+  $('#s100total').textContent=t;
+  const hint=$('#s100hint');
+  if(t>=85){ hint.className='s100-hint t-prime'; hint.textContent='✓ ≥85分 — 优先打样'; }
+  else if(t>=70){ hint.className='s100-hint t-pool'; hint.textContent='✓ ≥70分 — 进入立项池'; }
+  else { hint.className='s100-hint t-out'; hint.textContent='未达70分立项阈值'; }
+}
+
+/* 保存评审 */
+function saveReview(){
+  const s=getById(curId); if(!s) return;
+  // 红线
+  s.redlines = $$('#redlineBox input[type=checkbox]').map(cb=>cb.checked);
+  s.redlineHit = s.redlines.some(Boolean);
+  // 门槛
+  s.gates={};
+  $$('.seg').forEach(seg=>{ if(seg.dataset.value) s.gates[seg.dataset.gate]=seg.dataset.value; });
+  // 四维
+  s.scores={}; s.reasons={};
+  $$('input[data-dimkey]').forEach(sl=>s.scores[sl.dataset.dimkey]=Number(sl.value));
+  $$('textarea[data-reason]').forEach(t=>{ if(t.value.trim()) s.reasons[t.dataset.reason]=t.value.trim(); });
+  s.weightedTotal=calcWeighted(s.scores);
+  s.grade=gradeOf(s.weightedTotal);
+  // 100分
+  s.score100={}; let any=false;
+  $$('input[data-s100]').forEach(inp=>{ if(inp.value!==''){ s.score100[inp.dataset.s100]=Number(inp.value); any=true; } });
+  s.total100 = any ? calc100(s.score100) : null;
+  // 意见
+  s.reviewer=$('#reviewerInput').value.trim();
+  s.comment=$('#commentInput').value.trim();
+  s.stage=$('#stageSelect').value;
+  // 状态：评审后 → 已初筛
+  s.status='已初筛';
+  s.reviewedAt=Date.now();
+  upsert(s);
+  toast(`✓ 评审已保存 — ${s.grade}（综合 ${s.weightedTotal.toFixed(2)}）`);
+  updateCounts();
+  showReviewList(); renderReviewList();
+}
+
+/* 编辑提报内容：回填到 Tab1 表单 */
+function editScenario(id){
+  const s=getById(id); if(!s) return;
+  const f=submitForm;
+  Object.entries(s.fields).forEach(([k,v])=>{ if(f.elements[k]) f.elements[k].value=v; });
+  f.querySelector('[name=editId]').value=id;
+  const anyDeep=Object.keys(s.fields).some(k=>k.startsWith('d_')||k.startsWith('dc_'));
+  if(anyDeep) f.querySelector('details.collapse').open=true;
+  switchView('submit');
+  toast('已载入到提报表单，修改后重新提交即覆盖');
+}
+
+/* ====================================================================
+   TAB 3：看板
+   ==================================================================== */
+function renderBoard(){
+  const list=loadAll();
+  const total=list.length;
+  const reviewed=list.filter(s=>s.status==='已初筛');
+  const grades={P0:0,P1:0,P2:0,'淘汰':0};
+  reviewed.forEach(s=>{ if(grades[s.grade]!=null) grades[s.grade]++; });
+  const redCount=list.filter(s=>s.redlineHit).length;
+  const scored=reviewed.filter(s=>s.weightedTotal!=null);
+  const avg = scored.length ? (scored.reduce((a,s)=>a+s.weightedTotal,0)/scored.length) : 0;
+
+  // 统计卡
+  $('#statGrid').innerHTML=`
+    <div class="stat"><div class="num">${total}</div><div class="lbl">总提报数</div></div>
+    <div class="stat cyan"><div class="num">${reviewed.length}</div><div class="lbl">已初筛</div></div>
+    <div class="stat"><div class="num" style="color:var(--p0)">${grades.P0}</div><div class="lbl">P0 优先立项</div></div>
+    <div class="stat"><div class="num" style="color:var(--primary-2)">${grades.P1}</div><div class="lbl">P1 深度评估</div></div>
+    <div class="stat"><div class="num" style="color:var(--p2)">${grades.P2}</div><div class="lbl">P2 入库观察</div></div>
+    <div class="stat"><div class="num" style="color:var(--drop)">${grades['淘汰']}</div><div class="lbl">淘汰</div></div>
+    <div class="stat danger"><div class="num">${redCount}</div><div class="lbl">触碰红线</div></div>
+    <div class="stat accent"><div class="num">${avg.toFixed(2)}</div><div class="lbl">平均综合得分</div></div>`;
+
+  renderFunnel(list);
+  renderPrioBars(grades);
+  renderDonut(list);
+  renderModBars(list);
+}
+
+/* 漏斗：按 stage 统计，呈递减梯形宽度 */
+function renderFunnel(list){
+  const counts=FUNNEL_STAGES.map(st=>list.filter(s=>s.stage===st.key).length);
+  const max=Math.max(1,...counts);
+  $('#funnel').innerHTML=FUNNEL_STAGES.map((st,i)=>{
+    const w=100 - i*15; // 100,85,70,55,40
+    return `<div class="funnel-step" style="width:${w}%;background:linear-gradient(135deg,${st.color},${st.color}cc)">
+      <div><div class="fs-name">${st.key}</div><div class="fs-sub">${st.sub}</div></div>
+      <div class="fs-count">${counts[i]}</div>
+    </div>`;
+  }).join('');
+}
+
+/* 优先级条形图 */
+function renderPrioBars(grades){
+  const colors={P0:'var(--p0)',P1:'var(--primary)',P2:'var(--p2)','淘汰':'var(--drop)'};
+  const max=Math.max(1,...Object.values(grades));
+  $('#prioBars').innerHTML=Object.entries(grades).map(([k,v])=>`
+    <div class="bar-row">
+      <span class="bl" style="color:${colors[k]}">${k}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.max(v?12:0,v/max*100)}%;background:${colors[k]}">${v||''}</div></div>
+      <span class="bv">${v}</span>
+    </div>`).join('');
+}
+
+/* 环形图（状态构成：待初筛 / 已初筛 / 触碰红线）—— inline SVG */
+function renderDonut(list){
+  const data=[
+    {label:'待初筛',value:list.filter(s=>s.status==='待初筛').length,color:'#6b7ba0'},
+    {label:'已初筛',value:list.filter(s=>s.status==='已初筛'&&!s.redlineHit).length,color:'#4f6bff'},
+    {label:'触碰红线',value:list.filter(s=>s.redlineHit).length,color:'#f87171'}
+  ];
+  const total=data.reduce((a,d)=>a+d.value,0);
+  const C=2*Math.PI*52; let offset=0;
+  let segs='';
+  if(total===0){
+    segs=`<circle cx="70" cy="70" r="52" fill="none" stroke="#27375f" stroke-width="22"/>`;
+  } else {
+    data.forEach(d=>{
+      if(d.value===0) return;
+      const len=d.value/total*C;
+      segs+=`<circle cx="70" cy="70" r="52" fill="none" stroke="${d.color}" stroke-width="22"
+        stroke-dasharray="${len} ${C-len}" stroke-dashoffset="${-offset}" transform="rotate(-90 70 70)"/>`;
+      offset+=len;
+    });
+  }
+  $('#donut').innerHTML=`<svg width="140" height="140" viewBox="0 0 140 140">
+    ${segs}
+    <text x="70" y="66" text-anchor="middle" fill="var(--text)" font-size="28" font-weight="800">${total}</text>
+    <text x="70" y="86" text-anchor="middle" fill="var(--text-3)" font-size="11">总场景</text>
+  </svg>`;
+  $('#donutLegend').innerHTML=data.map(d=>`<div class="li"><span class="dot" style="background:${d.color}"></span>${d.label} · <b>${d.value}</b></div>`).join('');
+}
+
+/* 模块分布 */
+function renderModBars(list){
+  const m={};
+  list.forEach(s=>{ const k=s.fields.module||'未分类'; m[k]=(m[k]||0)+1; });
+  const entries=Object.entries(m).sort((a,b)=>b[1]-a[1]);
+  if(!entries.length){ $('#modBars').innerHTML='<p class="card-desc">暂无数据</p>'; return; }
+  const max=Math.max(...entries.map(e=>e[1]));
+  $('#modBars').innerHTML=entries.map(([k,v])=>`
+    <div class="mod-bar"><span class="mn">${esc(k)}</span>
+      <div class="mt"><div class="mf" style="width:${v/max*100}%"></div></div>
+      <span class="mv">${v}</span></div>`).join('');
+}
+
+/* ---- 导入/导出/清空 ---- */
+$('#exportBtn').onclick=()=>{
+  const data=JSON.stringify(loadAll(),null,2);
+  const blob=new Blob([data],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='金种子场景库_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click(); URL.revokeObjectURL(a.href);
+  toast('✓ 已导出 '+loadAll().length+' 条场景');
+};
+$('#importBtn').onclick=()=>$('#importFile').click();
+$('#importFile').onchange=e=>{
+  const file=e.target.files[0]; if(!file) return;
+  const r=new FileReader();
+  r.onload=async()=>{
+    try{
+      const arr=JSON.parse(r.result);
+      if(!Array.isArray(arr)) throw new Error('格式应为数组');
+      const ok=await confirmModal('导入数据',`将导入 ${arr.length} 条场景并合并到现有数据（按ID去重，导入项覆盖同ID）。继续？`);
+      if(!ok){ e.target.value=''; return; }
+      const cur=loadAll();
+      const map=new Map(cur.map(s=>[s.id,s]));
+      arr.forEach(s=>{ if(s&&s.id) map.set(s.id,s); });
+      saveAll([...map.values()]);
+      toast('✓ 已导入，当前共 '+map.size+' 条');
+      updateCounts();
+      switchView('board');
+    }catch(err){ toast('导入失败：'+err.message,true); }
+    e.target.value='';
+  };
+  r.readAsText(file);
+};
+$('#clearAllBtn').onclick=async()=>{
+  const ok=await confirmModal('清空全部数据','将删除本系统中全部场景数据（localStorage），不可撤销。确定？');
+  if(ok){ saveAll([]); toast('已清空全部数据'); updateCounts(); renderBoard(); }
+};
+
+/* ---- 计数 & 初始化 ---- */
+function updateCounts(){ $('#tabReviewCount').textContent=loadAll().length; }
+updateCounts();
+</script>
+</body>
+</html>
