@@ -57,6 +57,16 @@ export interface Comment {
   created_at: string;
 }
 
+export interface Attachment {
+  id: string;
+  scenario_id: string;
+  uploader_id: string;
+  filename: string;
+  file_url: string;
+  confidentiality_level: string;
+  created_at: string;
+}
+
 export interface Notification {
   id: string;
   event: string;
@@ -94,4 +104,18 @@ export const VETO_FLAGS: Record<string, string> = {
   roi_undefinable: "ROI无法定义",
   compliance_risk: "安全/合规/隐私/数据风险不可控",
   full_auto_no_human: "关键动作完全自动化且无人工确认",
+};
+
+export const WTP_LABELS: Record<string, string> = {
+  strong: "强",
+  medium: "中",
+  weak: "弱",
+  unknown: "未知",
+};
+
+export const CONFIDENTIALITY_LABELS: Record<string, string> = {
+  public: "公开",
+  internal: "内部",
+  sensitive: "敏感",
+  confidential: "客户机密",
 };

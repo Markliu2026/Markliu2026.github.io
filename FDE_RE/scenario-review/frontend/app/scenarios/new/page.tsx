@@ -9,13 +9,16 @@ import {
   Message,
   Select,
   Space,
+  Tooltip,
   Typography,
 } from "@arco-design/web-react";
+import { IconBulb } from "@arco-design/web-react/icon";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import PageContainer from "@/components/PageContainer";
 import { api } from "@/lib/api";
 import type { Scenario } from "@/lib/types";
+import { TEMPLATES } from "@/lib/templates";
 
 const { Row, Col } = Grid;
 const FormItem = Form.Item;
@@ -29,6 +32,27 @@ export default function NewScenarioPage() {
   const router = useRouter();
   const [form] = Form.useForm();
   const [saving, setSaving] = useState(false);
+
+  function applyTemplate(key: string) {
+    const t = TEMPLATES.find((x) => x.key === key);
+    if (!t) return;
+    form.setFieldsValue({
+      title: t.title,
+      industry: t.industry,
+      sap_modules: t.sap_modules,
+      ai_capabilities: t.ai_capabilities,
+      customer_name: t.customer_name,
+      pain_point: t.pain_point,
+      human_process: t.human_process,
+      frequency: t.frequency,
+      volume: t.volume,
+      kpi_candidates: t.kpi_candidates,
+      data_basis: t.data_basis,
+      willingness_to_pay: t.willingness_to_pay,
+      estimated_value: t.estimated_value,
+    });
+    Message.info(`已套用样版：${t.name}，可直接修改后提交`);
+  }
 
   async function save(submit: boolean) {
     let values;
@@ -65,6 +89,27 @@ export default function NewScenarioPage() {
         新建提报
       </Typography.Title>
       <Typography.Text type="secondary">轻量提报表 · 10 分钟内完成（§6.1）</Typography.Text>
+
+      <Card
+        bordered={false}
+        style={{ borderRadius: 8, marginTop: 16, background: "var(--color-primary-light-1)" }}
+        bodyStyle={{ padding: "12px 16px" }}
+      >
+        <Space align="center" wrap>
+          <IconBulb style={{ color: "rgb(var(--gold-6))" }} />
+          <Typography.Text style={{ fontWeight: 600 }}>案例样版</Typography.Text>
+          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+            一键填充后可直接修改提交：
+          </Typography.Text>
+          {TEMPLATES.map((t) => (
+            <Tooltip key={t.key} content={t.summary}>
+              <Button size="small" type="outline" onClick={() => applyTemplate(t.key)}>
+                {t.name}
+              </Button>
+            </Tooltip>
+          ))}
+        </Space>
+      </Card>
 
       <Card bordered={false} style={{ borderRadius: 8, marginTop: 16 }}>
         <Form

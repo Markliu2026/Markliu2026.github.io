@@ -6,38 +6,52 @@ import {
   Descriptions,
   Divider,
   Input,
+  Link as ArcoLink,
   Message,
   Space,
   Spin,
   Tag,
   Typography,
 } from "@arco-design/web-react";
-import { IconSend } from "@arco-design/web-react/icon";
+import { IconLink, IconSend } from "@arco-design/web-react/icon";
 import { use, useEffect, useState } from "react";
 import PageContainer from "@/components/PageContainer";
 import { RecoBadge, StatusBadge } from "@/components/Badges";
 import { api } from "@/lib/api";
-import type { Comment, ReviewScore, Scenario } from "@/lib/types";
-import { VETO_FLAGS } from "@/lib/types";
-
-const WTP: Record<string, string> = { strong: "强", medium: "中", weak: "弱", unknown: "未知" };
+import type { Attachment, Comment, ReviewScore, Scenario } from "@/lib/types";
+import { CONFIDENTIALITY_LABELS, VETO_FLAGS, WTP_LABELS } from "@/lib/types";
 
 export default function ScenarioDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const [sc, setSc] = useState<Scenario | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [scores, setScores] = useState<ReviewScore[]>([]);
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [newComment, setNewComment] = useState("");
+  const [attName, setAttName] = useState("");
+  const [attUrl, setAttUrl] = useState("");
   const [err, setErr] = useState("");
 
   async function reload() {
     setSc(await api.get<Scenario>(`/api/scenarios/${id}`));
     setComments(await api.get<Comment[]>(`/api/scenarios/${id}/comments`));
+    setAttachments(await api.get<Attachment[]>(`/api/scenarios/${id}/attachments`));
     try {
       setScores(await api.get<ReviewScore[]>(`/api/scenarios/${id}/scores`));
     } catch {
       setScores([]); // 普通顾问无权看评分明细
     }
+  }
+
+  async function addAttachment() {
+    if (!attName.trim() || !attUrl.trim()) {
+      Message.warning("请填写附件名称与链接（样本数据仅登记链接，不入库）");
+      return;
+    }
+    await api.post(`/api/scenarios/${id}/attachments`, { filename: attName, file_url: attUrl });
+    setAttName("");
+    setAttUrl("");
+    setAttachments(await api.get<Attachment[]>(`/api/scenarios/${id}/attachments`));
   }
 
   useEffect(() => {
@@ -78,7 +92,16 @@ export default function ScenarioDetailPage({ params }: { params: Promise<{ id: s
     { label: "决策频率", value: sc.frequency || "—" },
     { label: "处理数量", value: sc.volume || "—" },
     { label: "候选 KPI", value: sc.kpi_candidates.join("、") || "—" },
-    { label: "付费意愿", value: WTP[sc.willingness_to_pay] ?? sc.willingness_to_pay },
+    { label: "付费意愿", value: WTP_LABELS[sc.willingness_to_pay] ?? sc.willingness_to_pay },
+    { label: "预估价值", value: sc.estimated_value || "—" },
+    {
+      label: "保密级别",
+      value: (
+        <Tag size="small" color={sc.confidentiality_level === "public" ? "green" : "gray"}>
+          {CONFIDENTIALITY_LABELS[sc.confidentiality_level] ?? sc.confidentiality_level}
+        </Tag>
+      ),
+    },
     { label: "业务痛点", value: sc.pain_point || "—", span: 2 },
     { label: "人工现状", value: sc.human_process || "—", span: 2 },
     { label: "数据基础", value: sc.data_basis || "—", span: 2 },
@@ -145,6 +168,49 @@ export default function ScenarioDetailPage({ params }: { params: Promise<{ id: s
           ))}
         </Card>
       )}
+
+      <Card
+        bordered={false}
+        style={{ borderRadius: 8, marginTop: 16 }}
+        title={
+          <Space>
+            附件
+            <Typography.Text type="secondary" style={{ fontSize: 12, fontWeight: 400 }}>
+              （样本数据不入库，仅登记链接 · §11.2）
+            </Typography.Text>
+          </Space>
+        }
+      >
+        {attachments.length === 0 && <Typography.Text type="secondary">暂无附件</Typography.Text>}
+        {attachments.map((a) => (
+          <div key={a.id} style={{ padding: "6px 0" }}>
+            <IconLink style={{ marginRight: 6, color: "rgb(var(--primary-6))" }} />
+            <ArcoLink href={a.file_url} target="_blank">
+              {a.filename}
+            </ArcoLink>
+            <Tag size="small" style={{ marginLeft: 8 }}>
+              {CONFIDENTIALITY_LABELS[a.confidentiality_level] ?? a.confidentiality_level}
+            </Tag>
+          </div>
+        ))}
+        <Space style={{ marginTop: 12, width: "100%" }}>
+          <Input
+            style={{ width: 220 }}
+            placeholder="附件名称（如：流程图）"
+            value={attName}
+            onChange={setAttName}
+          />
+          <Input
+            style={{ width: 360 }}
+            placeholder="链接 URL（流程图/截图/样例报表/纪要）"
+            value={attUrl}
+            onChange={setAttUrl}
+          />
+          <Button icon={<IconLink />} onClick={addAttachment}>
+            登记链接
+          </Button>
+        </Space>
+      </Card>
 
       <Card bordered={false} style={{ borderRadius: 8, marginTop: 16 }} title="评论与反馈">
         {comments.length === 0 && <Typography.Text type="secondary">暂无评论</Typography.Text>}
