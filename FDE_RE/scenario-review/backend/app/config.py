@@ -18,6 +18,9 @@ class Settings(BaseSettings):
     # 多租户（MVP一期单租户）
     default_tenant_id: str = "t-default"
 
+    # 启动时若库为空则写入种子数据（容器首跑用）
+    seed_on_start: bool = False
+
     # CORS（逗号分隔）
     cors_origins: str = "http://localhost:3000"
 

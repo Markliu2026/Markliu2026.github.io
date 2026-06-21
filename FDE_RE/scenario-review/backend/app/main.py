@@ -17,6 +17,10 @@ from app.database import init_db
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
+    if settings.seed_on_start:
+        from app.seed import seed
+
+        await seed()
     yield
 
 
