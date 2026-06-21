@@ -1,6 +1,6 @@
 # 场景提报与评审系统 — 容器化部署（MVP一期）
 # 一键启动： docker compose up -d --build
-# 访问： http://localhost:3000  （前端经服务端代理 /api → backend）
+# 访问： http://localhost:3100  （前端经服务端代理 /api → backend）
 
 services:
   db:
@@ -24,7 +24,7 @@ services:
       DATABASE_URL: postgresql+asyncpg://scenario:${DB_PASSWORD:-scenario}@db:5432/scenario_review
       JWT_SECRET: ${JWT_SECRET:-change-me-in-prod}
       SEED_ON_START: "1"          # 首跑写入种子（幂等，库非空则跳过）
-      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3100}
     depends_on:
       db:
         condition: service_healthy
@@ -39,7 +39,7 @@ services:
     depends_on:
       - backend
     ports:
-      - "${WEB_PORT:-3000}:3000"
+      - "${WEB_PORT:-3100}:3000"   # 宿主 3100 → 容器内 3000
     restart: unless-stopped
 
 volumes:

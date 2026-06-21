@@ -29,10 +29,10 @@ uv run uvicorn app.main:app --reload --port 8099
 cd frontend
 npm install
 cp .env.local.example .env.local          # BACKEND_URL=http://localhost:8099
-npm run dev                                # http://localhost:3000
+npm run dev                                # http://localhost:3100
 ```
 
-打开 http://localhost:3000 ，用演示账号登录（密码均为 `Passw0rd!`）：
+打开 http://localhost:3100 ，用演示账号登录（密码均为 `Passw0rd!`）：
 `consultant`（提报人）/ `screener`（初筛人）/ `reviewer` / `manager` / `admin`。
 
 ## 已实现功能（对应设计文档）

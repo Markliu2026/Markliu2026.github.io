@@ -6,12 +6,12 @@
 ## 拓扑
 
 ```
-浏览器 ──▶ frontend:3000 ──(服务端 /api 代理)──▶ backend:8099 ──▶ db:5432 (postgres)
-                 │                                      │
-            对外暴露 3000                          仅集群内网络
+浏览器 ──▶ 宿主:3100 → frontend容器:3000 ──(服务端 /api 代理)──▶ backend:8099 ──▶ db:5432 (postgres)
+                 │                                          │
+            宿主对外暴露 3100                          仅集群内网络
 ```
 
-- 浏览器只访问前端 3000；前端 Next 服务端把 `/api/*` 代理到 `backend:8099`，因此**无跨域、后端不必对公网暴露**。
+- 浏览器只访问前端（宿主 3100，映射到容器内 3000）；前端 Next 服务端把 `/api/*` 代理到 `backend:8099`，因此**无跨域、后端不必对公网暴露**。
 - 数据持久化在命名卷 `pgdata`。
 
 ## 一键启动
@@ -23,7 +23,7 @@ docker compose up -d --build
 ```
 
 启动后：
-- 前端： http://localhost:3000
+- 前端： http://localhost:3100
 - 后端健康检查（容器内）： `docker compose exec backend curl -s localhost:8099/health`
 - 首次启动会自动写入种子数据（`SEED_ON_START=1`，幂等；库非空则跳过）。
 
@@ -44,7 +44,7 @@ docker compose up -d --build backend    # 仅重建后端
 | 项 | 说明 |
 |---|---|
 | 密钥 | `.env` 中 `JWT_SECRET`、`DB_PASSWORD` 必须改为强随机值 |
-| HTTPS | 前置 Nginx/Caddy/云负载均衡做 TLS 终止，反代到 frontend:3000 |
+| HTTPS | 前置 Nginx/Caddy/云负载均衡做 TLS 终止，反代到宿主 3100（容器内 3000） |
 | 迁移 | 当前用 `create_all` 自动建表；正式版改用 Alembic 迁移（架构 §15 已选型） |
 | 备份 | 定期备份 `pgdata` 卷或 `pg_dump` |
 | 扩展 | 二期引入 pgvector：把 `db` 镜像换为 `pgvector/pgvector:pg16` 并启用扩展（架构 §15/§19） |

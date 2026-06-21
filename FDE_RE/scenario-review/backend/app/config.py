@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     seed_on_start: bool = False
 
     # CORS（逗号分隔）
-    cors_origins: str = "http://localhost:3000"
+    cors_origins: str = "http://localhost:3100"
 
     @property
     def cors_origin_list(self) -> list[str]:
