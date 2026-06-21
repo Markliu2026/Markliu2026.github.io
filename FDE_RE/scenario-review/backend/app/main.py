@@ -9,7 +9,19 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import auth, notifications, reviews, scenarios
+from app.api import (
+    auth,
+    deep_eval,
+    incentive,
+    meetings,
+    notifications,
+    poc,
+    products,
+    reviews,
+    scenarios,
+    stats,
+    users,
+)
 from app.config import settings
 from app.database import init_db
 
@@ -43,6 +55,13 @@ app.include_router(auth.router)
 app.include_router(scenarios.router)
 app.include_router(reviews.router)
 app.include_router(notifications.router)
+app.include_router(users.router)
+app.include_router(deep_eval.router)
+app.include_router(meetings.router)
+app.include_router(poc.router)
+app.include_router(products.router)
+app.include_router(incentive.router)
+app.include_router(stats.router)
 
 
 @app.get("/health", tags=["system"])

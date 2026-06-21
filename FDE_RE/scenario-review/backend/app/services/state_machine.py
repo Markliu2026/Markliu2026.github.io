@@ -26,10 +26,44 @@ TRANSITIONS: dict[str, dict[str, set[str]]] = {
         S.REJECTED: {Role.SCREENER, Role.ADMIN},
         S.MERGED: {Role.SCREENER, Role.ADMIN},
     },
+    # 二期：深评 → 评审会 → POC 建议
+    S.RECOMMEND_DEEP: {
+        # 指定 Owner 时进入深评（见 assign-owner 接口）
+        S.DEEP_EVAL: {Role.SCREENER, Role.ADMIN},
+    },
+    S.DEEP_EVAL: {
+        S.PENDING_REVIEW: {Role.OWNER, Role.ADMIN},  # Owner 提交评审会
+        S.NEED_INFO: {Role.SCREENER, Role.ADMIN},
+    },
+    S.PENDING_REVIEW: {
+        S.POC_SUGGEST: {Role.REVIEWER, Role.MANAGER, Role.ADMIN},
+        S.OBSERVING: {Role.REVIEWER, Role.MANAGER, Role.ADMIN},
+        S.REJECTED: {Role.REVIEWER, Role.MANAGER, Role.ADMIN},
+        S.DEEP_EVAL: {Role.REVIEWER, Role.ADMIN},  # 退回补充深评材料
+    },
+    # 二期：POC 阶段
+    S.POC_SUGGEST: {
+        S.POC_RUNNING: {Role.MANAGER, Role.ADMIN},  # 管理层确认立项
+        S.OBSERVING: {Role.MANAGER, Role.ADMIN},
+    },
+    S.POC_RUNNING: {
+        S.POC_SUCCESS: {Role.OWNER, Role.SCREENER, Role.ADMIN},
+        S.POC_FAILED: {Role.OWNER, Role.SCREENER, Role.ADMIN},
+    },
+    # 三期：产品化
+    S.POC_SUCCESS: {
+        S.PRODUCTIZING: {Role.MANAGER, Role.ADMIN},
+    },
+    S.POC_FAILED: {
+        S.OBSERVING: {Role.SCREENER, Role.ADMIN},
+    },
+    S.PRODUCTIZING: {
+        S.PRODUCTIZED: {Role.MANAGER, Role.ADMIN},
+    },
 }
 
-# 终态
-TERMINAL: set[str] = {S.OBSERVING, S.RECOMMEND_DEEP, S.REJECTED, S.MERGED}
+# 终态（当前阶段不再继续流转的状态）
+TERMINAL: set[str] = {S.REJECTED, S.MERGED, S.PRODUCTIZED}
 
 
 class TransitionError(Exception):

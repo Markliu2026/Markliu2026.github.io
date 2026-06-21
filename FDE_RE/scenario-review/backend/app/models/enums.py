@@ -17,7 +17,7 @@ class Role(StrEnum):
 
 
 class ScenarioStatus(StrEnum):
-    """场景状态（§5.1）。MVP一期聚焦提报与初筛闭环，但完整状态集合一并定义以便演进。"""
+    """场景状态（§5.1）。"""
 
     DRAFT = "draft"                  # 草稿
     SUBMITTED = "submitted"          # 已提交
@@ -27,6 +27,15 @@ class ScenarioStatus(StrEnum):
     RECOMMEND_DEEP = "recommend_deep"  # 推荐深评
     REJECTED = "rejected"            # 已淘汰
     MERGED = "merged"                # 已合并
+    # 二期：深评 → 评审会 → POC → 产品化
+    DEEP_EVAL = "deep_eval"          # 深评中
+    PENDING_REVIEW = "pending_review"  # 待评审会
+    POC_SUGGEST = "poc_suggest"      # POC建议
+    POC_RUNNING = "poc_running"      # POC进行中
+    POC_SUCCESS = "poc_success"      # POC成功
+    POC_FAILED = "poc_failed"        # POC未通过
+    PRODUCTIZING = "productizing"    # 产品化中
+    PRODUCTIZED = "productized"      # 已产品化
 
 
 class ScoreType(StrEnum):

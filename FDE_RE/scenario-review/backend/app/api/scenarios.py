@@ -20,7 +20,7 @@ from app.schemas.scenario import (
     ScenarioUpdate,
     StatusChangeRequest,
 )
-from app.services import state_machine
+from app.services import incentive, state_machine
 from app.services.notification import notify
 
 router = APIRouter(prefix="/api/scenarios", tags=["scenarios"])
@@ -153,6 +153,10 @@ async def submit_scenario(
 
     state_machine.assert_transition(sc.status, ScenarioStatus.SUBMITTED, user.roles)
     sc.status = ScenarioStatus.SUBMITTED
+    # 有效提报积分（§6.9.1，幂等）
+    await incentive.award(
+        db, user_id=sc.submitter_id, event="valid_submit", scenario_id=sc.id, tenant_id=sc.tenant_id
+    )
     # 通知创新中心初筛人（§10）
     for screener in await _users_with_role(db, Role.SCREENER):
         await notify(
@@ -173,7 +177,8 @@ async def transition(
     scenario_id: str,
     payload: StatusChangeRequest,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_roles(Role.SCREENER, Role.ADMIN)),
+    # 端点放开到任意登录用户，由状态机按 from→to 校验具体角色（§5.2/§19.2 单一权威）
+    user: User = Depends(get_current_user),
 ) -> Scenario:
     sc = await _get_owned_scenario(db, scenario_id, user)
     try:
@@ -181,6 +186,7 @@ async def transition(
     except state_machine.TransitionError as e:
         raise HTTPException(status.HTTP_409_CONFLICT, str(e)) from e
     sc.status = payload.target_status
+    await incentive.award_for_status(db, sc)  # 触发对应阶段积分（§6.9.1）
     if payload.comment:
         db.add(
             ScenarioComment(

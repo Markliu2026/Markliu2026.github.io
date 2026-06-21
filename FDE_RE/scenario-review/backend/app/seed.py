@@ -10,12 +10,14 @@ import asyncio
 from sqlalchemy import select
 
 from app.database import SessionLocal, init_db
+from app.models.deep_eval import DeepEvaluation
 from app.models.enums import Role, ScenarioStatus, ScoreType, WillingnessToPay
+from app.models.poc import Milestone, PocProject, ValueMetric
 from app.models.review import ReviewScore
 from app.models.scenario import Scenario
 from app.models.user import User
 from app.security import hash_password
-from app.services import scoring
+from app.services import roi, scoring
 
 DEFAULT_PASSWORD = "Passw0rd!"
 
@@ -214,11 +216,104 @@ async def ensure_examples(db, users: dict[str, User]) -> int:
     return added
 
 
+async def ensure_poc_demo(db, users: dict[str, User]) -> bool:
+    """补一个进行中的 POC 示例（含深评/里程碑/价值指标），让看板与驾驶舱有内容。"""
+    title = "排产优化 POC 试点（示例）"
+    existing = (
+        await db.execute(select(Scenario).where(Scenario.title == title))
+    ).scalars().first()
+    if existing:
+        return False
+    sc = Scenario(
+        title=title,
+        status=ScenarioStatus.POC_RUNNING,
+        industry=["离散制造"],
+        sap_modules=["PP", "MM"],
+        ai_capabilities=["优化", "预测"],
+        customer_name="某汽车零部件客户（脱敏）",
+        pain_point="计划员凭经验排产，换型多、齐套差、交付延误。",
+        human_process="计划员每日手工平衡产能与物料。",
+        frequency="每日",
+        volume="约600工单",
+        kpi_candidates=["OTD", "设备利用率(OEE)"],
+        data_basis="SAP PP 可得，MES 接口对接。",
+        willingness_to_pay=WillingnessToPay.STRONG,
+        estimated_value="交付准时率+12%",
+        submitter_id=users["consultant"].id,
+        owner_id=users["owner"].id,
+        latest_weighted_score=4.55,
+        latest_recommendation="P0",
+    )
+    db.add(sc)
+    await db.flush()
+
+    r = roi.compute_roi(labor_saving=150, business_improvement=120, poc_investment=60, ops_cost=40)
+    db.add(
+        DeepEvaluation(
+            scenario_id=sc.id,
+            business_process="当前排产流程图 + 异常处理",
+            data_diligence="工单/BOM/产能日历可得，质量良好",
+            ai_capability_fit="约束求解 + 需求预测适配度高",
+            closed_loop="输出排产建议→计划员确认→写回SAP",
+            risks="数据时效、组织采纳",
+            resources="FDE 1 + 研发 1 + 客户计划专家",
+            productization_potential="跨客户可复用度高",
+            baseline="近三月计划达成率 78%",
+            labor_saving=150,
+            business_improvement=120,
+            poc_investment=60,
+            ops_cost=40,
+            annual_benefit=r.annual_benefit,
+            total_investment=r.total_investment,
+            roi_multiple=r.roi_multiple,
+            payback_months=r.payback_months,
+        )
+    )
+    poc = PocProject(
+        scenario_id=sc.id,
+        customer=sc.customer_name,
+        owner_id=users["owner"].id,
+        stage="mvp",
+        baseline_locked=True,
+        risk_level="mid",
+        result="running",
+        start_date="2026-05-01",
+        end_date="2026-07-31",
+        progress="MVP 原型完成，专家评分 4.2/5",
+        next_plan="进入流程闭环联调",
+        blockers="客户测试环境权限待开通",
+    )
+    db.add(poc)
+    await db.flush()
+    db.add_all(
+        [
+            Milestone(poc_id=poc.id, name="现场诊断+baseline", stage="diagnose", done=True),
+            Milestone(poc_id=poc.id, name="MVP 原型+评价集", stage="mvp", done=True),
+            Milestone(poc_id=poc.id, name="流程闭环+写回", stage="closedloop", done=False),
+            Milestone(poc_id=poc.id, name="业务验证+ROI", stage="validate", done=False),
+        ]
+    )
+    db.add_all(
+        [
+            ValueMetric(
+                poc_id=poc.id, category="economic", name="年化人力成本节省",
+                baseline="0", target="150", unit="万元", period="年", source="HR+财务",
+            ),
+            ValueMetric(
+                poc_id=poc.id, category="business", name="交付准时率 OTD",
+                baseline="82%", target="92%", unit="%", period="月", source="SAP SD",
+            ),
+        ]
+    )
+    return True
+
+
 async def seed() -> None:
     await init_db()
     async with SessionLocal() as db:
         users = await ensure_users(db)
         added = await ensure_examples(db, users)
+        await ensure_poc_demo(db, users)
         await db.commit()
     print(f"种子完成：用户已就绪，新增示例场景 {added} 个。")
     print(f"默认密码：{DEFAULT_PASSWORD}")
