@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>金种子 · 场景提报与评审系统（MVP一期在线 Demo）</title>
+<meta name="description" content="SAP数智工程师场景提报与评审系统 MVP一期：提报与初筛闭环。纯前端交互演示，含四维评分、否决项降级、状态机流转。" />
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body{font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#f6f7f9}
+  .chip{padding:.25rem .65rem;border-radius:9999px;font-size:.75rem;border:1px solid #e5e7eb;cursor:pointer;background:#fff;color:#4b5563}
+  .chip.on{background:#2563eb;color:#fff;border-color:#2563eb}
+  .input{width:100%;border:1px solid #e5e7eb;border-radius:6px;padding:.5rem .75rem;font-size:.875rem}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+// ====================================================================
+// 数据与逻辑（与后端 §6.3 评分、§5 状态机、§6.3.3 否决项一致）
+// ====================================================================
+const WEIGHTS = { bv:0.40, feas:0.25, rep:0.20, strat:0.15 };
+
+const STATUS_LABELS = { draft:"草稿", submitted:"已提交", need_info:"待补充", screening:"初筛中",
+  observing:"入库观察", recommend_deep:"推荐深评", rejected:"已淘汰", merged:"已合并" };
+const STATUS_COLOR = { draft:"bg-gray-100 text-gray-600", submitted:"bg-blue-100 text-blue-700",
+  need_info:"bg-amber-100 text-amber-700", screening:"bg-indigo-100 text-indigo-700",
+  observing:"bg-slate-100 text-slate-600", recommend_deep:"bg-green-100 text-green-700",
+  rejected:"bg-red-100 text-red-600", merged:"bg-purple-100 text-purple-600" };
+const RECO_LABELS = { P0:"P0 优先立项", P1:"P1 深度评估", P2:"P2 入库观察",
+  reject:"淘汰", need_info:"补充", merge:"合并" };
+const RECO_COLOR = { P0:"bg-green-600 text-white", P1:"bg-green-100 text-green-700",
+  P2:"bg-slate-100 text-slate-600", reject:"bg-red-100 text-red-600",
+  need_info:"bg-amber-100 text-amber-700", merge:"bg-purple-100 text-purple-600" };
+const VETO_FLAGS = { no_business_owner:"无明确业务Owner", no_data_in_3m:"三个月内无法获得数据样本",
+  demo_only:"只能做演示，无法进入真实流程", roi_undefinable:"ROI无法定义",
+  compliance_risk:"安全/合规/隐私/数据风险不可控", full_auto_no_human:"关键动作完全自动化且无人工确认" };
+
+// 状态机：from -> {to -> [允许角色]}（§5.2）
+const TRANSITIONS = {
+  draft:{ submitted:["submitter","admin"] },
+  submitted:{ screening:["screener","admin"], need_info:["screener","admin"] },
+  need_info:{ submitted:["submitter","admin"] },
+  screening:{ need_info:["screener","admin"], observing:["screener","admin"],
+    recommend_deep:["screener","admin"], rejected:["screener","admin"], merged:["screener","admin"] },
+};
+
+const ROLE_LABELS = { submitter:"提报人", owner:"Owner", screener:"初筛人",
+  reviewer:"评委", ai_rep:"AI研发", manager:"管理层", admin:"管理员" };
+
+function weighted(s){ return Math.round((s.bv*WEIGHTS.bv + s.feas*WEIGHTS.feas + s.rep*WEIGHTS.rep + s.strat*WEIGHTS.strat)*100)/100; }
+function classify(w){ return w>=4?"P0":w>=3?"P1":w>=2?"P2":"reject"; }
+function recommend(s, veto){ let r=classify(weighted(s)); if(veto&&veto.length&&(r==="P0"||r==="P1")) r="need_info"; return r; }
+
+// ====================================================================
+// 存储（localStorage 模拟后端，可重置）
+// ====================================================================
+const KEY="sr_demo_v1";
+let DB=null, SESSION=null;
+
+function seed(){
+  const u=(id,username,name,roles,dept)=>({id,username,display_name:name,roles,department:dept});
+  const users=[
+    u("u1","consultant","顾问·张工",["submitter"],"离散制造事业部"),
+    u("u2","owner","Owner·李工",["owner","submitter"],"流程制造事业部"),
+    u("u3","screener","初筛人·王经理",["screener"],"数智工程师创新中心"),
+    u("u4","reviewer","评委·赵专家",["reviewer"],"评审委员会"),
+    u("u5","manager","管理层·孙总",["manager"],"创新中心"),
+    u("u6","admin","系统管理员",["admin"],"IT"),
+  ];
+  const now=Date.now();
+  const scenarios=[
+    { id:"s1", title:"需求预测数智工程师", status:"submitted", industry:["离散制造"], sap_modules:["PP","MM"],
+      ai_capabilities:["预测"], customer_name:"某汽车零部件客户",
+      pain_point:"需求波动大，计划员凭经验预测，缺货与呆滞并存",
+      human_process:"计划员每周手工汇总历史出货+销售口头预测做调整",
+      frequency:"每周", volume:"约2000个SKU", kpi_candidates:["库存周转","OTD"],
+      data_basis:"SAP出货历史可得，销售预测在Excel", willingness_to_pay:"medium",
+      estimated_value:"库存降低15%", submitter_id:"u1", latest_weighted_score:null, latest_recommendation:null, created_at:now-86400000 },
+    { id:"s2", title:"月结异常自动稽核数智工程师", status:"draft", industry:["流程制造"], sap_modules:["FICO"],
+      ai_capabilities:["异常识别"], customer_name:"",
+      pain_point:"月结期间凭证异常靠人工逐笔排查，耗时且易漏",
+      human_process:"财务在月结日加班逐笔核对", frequency:"月度", volume:"数千张凭证",
+      kpi_candidates:["月结天数"], data_basis:"凭证数据在SAP可得", willingness_to_pay:"strong",
+      estimated_value:"", submitter_id:"u2", latest_weighted_score:null, latest_recommendation:null, created_at:now-43200000 },
+  ];
+  return { users, scenarios, scores:[], comments:[], notifications:[], seq:100 };
+}
+function load(){ try{ const r=localStorage.getItem(KEY); DB=r?JSON.parse(r):seed(); }catch(e){ DB=seed(); } }
+function save(){ localStorage.setItem(KEY, JSON.stringify(DB)); }
+function reset(){ DB=seed(); SESSION=null; localStorage.removeItem("sr_session"); save(); state.view="login"; render(); }
+function nid(p){ return p+(++DB.seq); }
+function userById(id){ return DB.users.find(u=>u.id===id); }
+function me(){ return SESSION?userById(SESSION):null; }
+function hasRole(...r){ const u=me(); return u && r.some(x=>u.roles.includes(x)); }
+function notify(uid,event,title,body,sid){ DB.notifications.unshift({id:nid("n"),recipient_id:uid,event,title,body:body||null,scenario_id:sid||null,is_read:false,created_at:Date.now()}); }
+
+// ====================================================================
+// 视图状态与路由
+// ====================================================================
+let state={ view:"login", scenarioId:null, activeScreen:null,
+  form:blankForm(), score:{bv:3,feas:3,rep:3,strat:3}, veto:[], scoreComment:"" };
+
+function blankForm(){ return { title:"", industry:[], sap_modules:[], ai_capabilities:[], customer_name:"",
+  pain_point:"", human_process:"", frequency:"", volume:"", kpi_candidates:"", data_basis:"",
+  willingness_to_pay:"unknown", estimated_value:"" }; }
+
+const esc=(s)=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function statusBadge(s){ return `<span class="px-2 py-0.5 rounded text-xs ${STATUS_COLOR[s]||'bg-gray-100'}">${STATUS_LABELS[s]||s}</span>`; }
+function recoBadge(r){ if(!r) return `<span class="text-xs text-gray-300">—</span>`; return `<span class="px-2 py-0.5 rounded text-xs ${RECO_COLOR[r]||'bg-gray-100'}">${RECO_LABELS[r]||r}</span>`; }
+
+// ====================================================================
+// 渲染
+// ====================================================================
+function render(){
+  const app=document.getElementById("app");
+  if(state.view==="login"){ app.innerHTML=loginView(); return; }
+  app.innerHTML = nav() + `<main class="max-w-6xl mx-auto px-4 py-6">${
+    state.view==="mine"? mineView():
+    state.view==="new"? newView():
+    state.view==="detail"? detailView():
+    state.view==="library"? libraryView():
+    state.view==="screening"? screeningView():
+    state.view==="notifications"? notifView(): ""
+  }</main>`;
+}
+
+function nav(){
+  const u=me();
+  const screener = hasRole("screener","admin");
+  const unread = DB.notifications.filter(n=>n.recipient_id===SESSION&&!n.is_read).length;
+  const link=(v,label,cls="")=>`<a onclick="go('${v}')" class="cursor-pointer hover:text-blue-700 ${state.view===v?'text-blue-700 font-medium':''} ${cls}">${label}</a>`;
+  return `<header class="bg-white border-b sticky top-0 z-10">
+    <div class="max-w-6xl mx-auto px-4 h-14 flex items-center gap-6">
+      <span class="font-semibold text-blue-700">金种子 · 场景提报评审</span>
+      <nav class="flex gap-4 text-sm text-gray-600">
+        ${link("mine","我的提报")}${link("new","新建提报")}${link("library","场景库")}
+        ${screener?link("screening","初筛队列","text-blue-600 font-medium"):""}
+        ${link("notifications", `通知${unread?`<span class='ml-1 bg-red-500 text-white rounded-full px-1.5 text-[10px]'>${unread}</span>`:""}`)}
+      </nav>
+      <div class="ml-auto flex items-center gap-3 text-sm">
+        <span class="text-gray-500">${esc(u.display_name)}（${u.roles.map(r=>ROLE_LABELS[r]).join("/")}）</span>
+        <button onclick="logout()" class="text-gray-400 hover:text-red-600">切换角色</button>
+        <button onclick="reset()" class="text-gray-300 hover:text-gray-600" title="重置演示数据">重置</button>
+      </div>
+    </div></header>`;
+}
+
+function loginView(){
+  const accts=[["consultant","提报人"],["screener","初筛人"],["reviewer","评委"],["manager","管理层"],["admin","管理员"]];
+  return `<div class="min-h-screen flex flex-col items-center justify-center px-4">
+    <div class="bg-white rounded-xl shadow p-8 w-full max-w-md">
+      <h1 class="text-xl font-semibold text-blue-700">金种子场景提报评审系统</h1>
+      <p class="text-sm text-gray-400 mb-1">MVP一期 · 提报与初筛闭环</p>
+      <p class="text-xs text-amber-600 bg-amber-50 rounded p-2 my-3">前端在线 Demo：数据保存在本地浏览器，可随时「重置」。真实系统为 Next.js + FastAPI 全栈。</p>
+      <p class="text-sm text-gray-600 mb-2">选择一个角色进入：</p>
+      <div class="grid grid-cols-2 gap-2">
+        ${accts.map(([u,l])=>`<button onclick="loginAs('${u}')" class="border rounded-lg px-3 py-3 text-left hover:border-blue-500 hover:bg-blue-50">
+          <div class="font-medium text-sm">${l}</div><div class="text-xs text-gray-400">${u}</div></button>`).join("")}
+      </div>
+      <a href="FDE_RE/SAP数智工程师场景提报与评审系统设计.md" class="block mt-5 text-xs text-blue-500 hover:underline">📄 查看系统设计文档</a>
+    </div>
+    <p class="text-xs text-gray-300 mt-6">SAP数智工程师创新中心 · 金种子场景众包计划</p>
+  </div>`;
+}
+
+function mineView(){
+  const list=DB.scenarios.filter(s=>s.submitter_id===SESSION).sort((a,b)=>b.created_at-a.created_at);
+  return `<div class="flex items-center justify-between mb-4">
+    <h1 class="text-lg font-semibold">我的提报</h1>
+    <button onclick="go('new')" class="bg-blue-600 text-white text-sm rounded px-3 py-1.5">+ 新建提报</button></div>
+    ${list.length===0?`<p class="text-gray-400 text-sm">还没有提报，点击右上角新建。</p>`:
+    `<div class="bg-white rounded-lg shadow-sm overflow-hidden"><table class="w-full text-sm">
+      <thead class="bg-gray-50 text-gray-500 text-left"><tr>
+        <th class="px-4 py-2">场景名称</th><th class="px-4 py-2">模块</th><th class="px-4 py-2">状态</th>
+        <th class="px-4 py-2">初筛分</th><th class="px-4 py-2">结论</th></tr></thead>
+      <tbody>${list.map(s=>`<tr class="border-t hover:bg-gray-50">
+        <td class="px-4 py-2"><a onclick="openDetail('${s.id}')" class="text-blue-700 hover:underline cursor-pointer">${esc(s.title)}</a></td>
+        <td class="px-4 py-2 text-gray-500">${s.sap_modules.join("、")||"—"}</td>
+        <td class="px-4 py-2">${statusBadge(s.status)}</td>
+        <td class="px-4 py-2">${s.latest_weighted_score??"—"}</td>
+        <td class="px-4 py-2">${recoBadge(s.latest_recommendation)}</td></tr>`).join("")}</tbody></table></div>`}`;
+}
+
+const MODULES=["PP","MM","SD","FICO","QM","PM/EAM","EWM","MDG"];
+const INDUSTRIES=["离散制造","流程制造","新能源","消费品","汽车","装备制造"];
+const AICAPS=["预测","优化","生成","审核","异常识别","RAG","Agent"];
+
+function newView(){
+  const f=state.form;
+  const chips=(field,opts)=>opts.map(o=>`<span class="chip ${f[field].includes(o)?'on':''}" onclick="toggleChip('${field}','${o}')">${o}</span>`).join("");
+  return `<h1 class="text-lg font-semibold mb-1">新建提报</h1>
+    <p class="text-sm text-gray-400 mb-5">轻量提报表 · 10 分钟内完成（§6.1）</p>
+    <div id="formErr"></div>
+    <div class="bg-white rounded-lg shadow-sm p-6 space-y-5">
+      ${field("场景名称 *",`<input class="input" value="${esc(f.title)}" oninput="setF('title',this.value)" placeholder="如：需求预测数智工程师">`)}
+      ${field("所属行业 *",`<div class="flex flex-wrap gap-2">${chips("industry",INDUSTRIES)}</div>`)}
+      ${field("所属模块 *",`<div class="flex flex-wrap gap-2">${chips("sap_modules",MODULES)}</div>`)}
+      ${field("AI 能力类型",`<div class="flex flex-wrap gap-2">${chips("ai_capabilities",AICAPS)}</div>`)}
+      ${field("客户/项目（可脱敏）",`<input class="input" value="${esc(f.customer_name)}" oninput="setF('customer_name',this.value)">`)}
+      ${field("业务痛点 *",`<textarea class="input" rows="2" oninput="setF('pain_point',this.value)">${esc(f.pain_point)}</textarea>`)}
+      ${field("现状如何靠人解决 *",`<textarea class="input" rows="2" oninput="setF('human_process',this.value)">${esc(f.human_process)}</textarea>`)}
+      <div class="grid grid-cols-2 gap-4">
+        ${field("决策频率",`<input class="input" value="${esc(f.frequency)}" oninput="setF('frequency',this.value)" placeholder="每日/每周/月度">`)}
+        ${field("处理数量",`<input class="input" value="${esc(f.volume)}" oninput="setF('volume',this.value)">`)}
+      </div>
+      ${field("可量化业务KPI *（逗号分隔）",`<input class="input" value="${esc(f.kpi_candidates)}" oninput="setF('kpi_candidates',this.value)" placeholder="OTD, 库存周转, 月结天数">`)}
+      ${field("数据基础 *",`<textarea class="input" rows="2" oninput="setF('data_basis',this.value)" placeholder="数据在SAP/外围系统/文档中是否可得">${esc(f.data_basis)}</textarea>`)}
+      <div class="grid grid-cols-2 gap-4">
+        ${field("客户付费意愿",`<select class="input" onchange="setF('willingness_to_pay',this.value)">
+          ${[["unknown","未知"],["strong","强"],["medium","中"],["weak","弱"]].map(([v,l])=>`<option value="${v}" ${f.willingness_to_pay===v?"selected":""}>${l}</option>`).join("")}</select>`)}
+        ${field("预估价值",`<input class="input" value="${esc(f.estimated_value)}" oninput="setF('estimated_value',this.value)" placeholder="降本/增效/增收量级">`)}
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button onclick="saveScenario(false)" class="border rounded px-4 py-2 text-sm">保存草稿</button>
+        <button onclick="saveScenario(true)" class="bg-blue-600 text-white rounded px-4 py-2 text-sm">提交</button>
+      </div>
+    </div>`;
+}
+function field(label,inner){ return `<div><label class="block text-sm text-gray-600 mb-1.5">${label}</label>${inner}</div>`; }
+
+function detailView(){
+  const s=DB.scenarios.find(x=>x.id===state.scenarioId); if(!s) return "场景不存在";
+  const comments=DB.comments.filter(c=>c.scenario_id===s.id);
+  const scores=DB.scores.filter(c=>c.scenario_id===s.id).sort((a,b)=>b.created_at-a.created_at);
+  const canSubmit = s.submitter_id===SESSION && (s.status==="draft"||s.status==="need_info");
+  const canScore = hasRole("screener","admin") || hasRole("reviewer");
+  const info=(l,v,full)=>`<div class="${full?'col-span-2':''}"><div class="text-xs text-gray-400">${l}</div><div class="text-gray-800 whitespace-pre-wrap">${esc(v)||"—"}</div></div>`;
+  return `<div class="flex items-center gap-3 mb-1">
+      <h1 class="text-lg font-semibold">${esc(s.title)}</h1>${statusBadge(s.status)}${recoBadge(s.latest_recommendation)}</div>
+    <p class="text-xs text-gray-400 mb-4">创建于 ${new Date(s.created_at).toLocaleString("zh-CN")}</p>
+    ${canSubmit?`<button onclick="submitScenario('${s.id}')" class="mb-4 bg-blue-600 text-white text-sm rounded px-4 py-2">提交初筛</button>`:""}
+    <section class="bg-white rounded-lg shadow-sm p-5 mb-5 grid grid-cols-2 gap-x-8 gap-y-3 text-sm">
+      ${info("所属行业",s.industry.join("、"))}${info("SAP 模块",s.sap_modules.join("、"))}
+      ${info("AI 能力",s.ai_capabilities.join("、"))}${info("客户/项目",s.customer_name)}
+      ${info("决策频率",s.frequency)}${info("处理数量",s.volume)}
+      ${info("候选KPI",s.kpi_candidates.join("、"))}${info("付费意愿",s.willingness_to_pay)}
+      ${info("业务痛点",s.pain_point,true)}${info("人工现状",s.human_process,true)}${info("数据基础",s.data_basis,true)}
+    </section>
+    ${(canScore&&scores.length)?`<section class="bg-white rounded-lg shadow-sm p-5 mb-5">
+      <h2 class="text-sm font-semibold mb-3">初筛评分记录</h2>
+      ${scores.map(sc=>`<div class="border-t py-2 text-sm first:border-t-0">
+        <div class="flex items-center gap-3">${recoBadge(sc.recommendation)}<span class="font-medium">加权分 ${sc.weighted_score}</span>
+        <span class="text-gray-400 text-xs">业务${sc.bv}/可行${sc.feas}/复制${sc.rep}/战略${sc.strat}</span></div>
+        ${sc.veto.length?`<div class="text-xs text-amber-700 mt-1">否决项：${sc.veto.map(f=>VETO_FLAGS[f]).join("；")}</div>`:""}
+        ${sc.comment?`<div class="text-gray-500 text-xs mt-1">${esc(sc.comment)}</div>`:""}</div>`).join("")}</section>`:""}
+    <section class="bg-white rounded-lg shadow-sm p-5">
+      <h2 class="text-sm font-semibold mb-3">评论与反馈</h2>
+      <div class="space-y-2 mb-3">${comments.length?comments.map(c=>`<div class="text-sm border-b pb-2"><span class="text-gray-700">${esc(c.content)}</span>
+        <span class="text-xs text-gray-300 ml-2">${esc(userById(c.author_id)?.display_name)} · ${new Date(c.created_at).toLocaleString("zh-CN")}</span></div>`).join(""):`<p class="text-xs text-gray-300">暂无评论</p>`}</div>
+      <div class="flex gap-2"><input id="cmt" class="flex-1 border rounded px-3 py-2 text-sm" placeholder="补充材料说明 / 反馈...">
+        <button onclick="addComment('${s.id}')" class="bg-gray-700 text-white text-sm rounded px-4">发送</button></div>
+    </section>`;
+}
+
+function libraryView(){
+  const list=DB.scenarios.filter(s=>s.status==="recommend_deep"||s.status==="observing")
+    .sort((a,b)=>(b.latest_weighted_score||0)-(a.latest_weighted_score||0));
+  return `<h1 class="text-lg font-semibold mb-1">场景库</h1>
+    <p class="text-sm text-gray-400 mb-4">推荐深评 / 入库观察的公开场景（§9.1）</p>
+    ${list.length===0?`<p class="text-gray-400 text-sm">暂无公开场景。完成一次初筛流转后这里会出现场景。</p>`:
+    `<div class="grid grid-cols-2 gap-4">${list.map(s=>`<div onclick="openDetail('${s.id}')" class="bg-white rounded-lg shadow-sm p-4 hover:shadow cursor-pointer">
+      <div class="flex items-center gap-2 mb-2"><span class="font-medium text-blue-700">${esc(s.title)}</span>${recoBadge(s.latest_recommendation)}</div>
+      <div class="flex items-center gap-2 mb-2">${statusBadge(s.status)}<span class="text-xs text-gray-400">${s.sap_modules.join("、")}</span></div>
+      <p class="text-sm text-gray-500 line-clamp-2">${esc(s.pain_point)}</p></div>`).join("")}</div>`}`;
+}
+
+function screeningView(){
+  const queue=DB.scenarios.filter(s=>s.status==="submitted"||s.status==="screening").sort((a,b)=>a.created_at-b.created_at);
+  const a=state.activeScreen?DB.scenarios.find(s=>s.id===state.activeScreen):null;
+  const sc=state.score, w=weighted(sc);
+  const level = state.veto.length?"命中否决项 → 不可直通":(w>=4?"P0":w>=3?"P1":w>=2?"P2":"淘汰");
+  const dims=[["bv","业务价值","40%"],["feas","技术可行性","25%"],["rep","可复制性","20%"],["strat","战略契合","15%"]];
+  const trans=[["recommend_deep","推荐深评"],["observing","入库观察"],["need_info","退回补充"],["rejected","淘汰"],["merged","合并"]];
+  return `<div class="grid grid-cols-3 gap-5">
+    <div class="col-span-1"><h1 class="text-lg font-semibold mb-3">初筛队列</h1>
+      ${queue.length===0?`<p class="text-gray-400 text-sm">队列为空。</p>`:`<div class="space-y-2">${queue.map(s=>`
+        <button onclick="pickScreen('${s.id}')" class="w-full text-left bg-white rounded-lg shadow-sm p-3 hover:shadow ${a&&a.id===s.id?'ring-2 ring-blue-500':''}">
+          <div class="flex items-center gap-2"><span class="font-medium text-sm">${esc(s.title)}</span>${statusBadge(s.status)}</div>
+          <div class="text-xs text-gray-400 mt-1">${s.sap_modules.join("、")}</div></button>`).join("")}</div>`}</div>
+    <div class="col-span-2">${!a?`<div class="bg-white rounded-lg shadow-sm p-8 text-center text-gray-400 text-sm">从左侧选择一个场景进行四维评分</div>`:`
+      <div class="bg-white rounded-lg shadow-sm p-5">
+        <h2 class="font-semibold mb-1">${esc(a.title)}</h2><p class="text-sm text-gray-500 mb-4">${esc(a.pain_point)}</p>
+        <div id="scoreMsg"></div>
+        <div class="space-y-3 mb-4">${dims.map(([k,l,wt])=>`<div class="flex items-center gap-3">
+          <span class="w-28 text-sm text-gray-600">${l}</span><span class="text-xs text-gray-400 w-10">${wt}</span>
+          <input type="range" min="1" max="5" step="1" value="${sc[k]}" oninput="setScore('${k}',this.value)" class="flex-1">
+          <span class="w-6 text-center font-medium">${sc[k]}</span></div>`).join("")}</div>
+        <div class="mb-4 p-3 bg-gray-50 rounded flex items-center justify-between">
+          <span class="text-sm text-gray-600">综合加权分（预览）</span><span class="font-semibold">${w.toFixed(2)} · ${level}</span></div>
+        <div class="mb-4"><div class="text-sm text-gray-600 mb-2">否决项（命中则不可直通 POC，§6.3.3）</div>
+          <div class="space-y-1">${Object.entries(VETO_FLAGS).map(([k,l])=>`<label class="flex items-center gap-2 text-sm text-gray-600">
+            <input type="checkbox" ${state.veto.includes(k)?"checked":""} onchange="toggleVeto('${k}')"> ${l}</label>`).join("")}</div></div>
+        <textarea id="scoreCmt" class="w-full border rounded px-3 py-2 text-sm mb-4" rows="2" placeholder="评分理由 / 退回原因（留痕）" oninput="state.scoreComment=this.value">${esc(state.scoreComment)}</textarea>
+        <div class="flex flex-wrap gap-2"><button onclick="submitScore('${a.id}')" class="bg-blue-600 text-white text-sm rounded px-4 py-2">提交评分</button>
+          <span class="w-px bg-gray-200 mx-1"></span>
+          ${trans.map(([t,l])=>`<button onclick="doTransition('${a.id}','${t}')" class="border text-sm rounded px-3 py-2 hover:bg-gray-50">${l}</button>`).join("")}</div>
+      </div>`}</div></div>`;
+}
+
+function notifView(){
+  const list=DB.notifications.filter(n=>n.recipient_id===SESSION);
+  return `<h1 class="text-lg font-semibold mb-4">通知</h1>
+    ${list.length===0?`<p class="text-gray-400 text-sm">暂无通知。</p>`:`<div class="bg-white rounded-lg shadow-sm divide-y">
+    ${list.map(n=>`<div class="p-4 ${n.is_read?'':'bg-blue-50/40'}" onclick="readNotif('${n.id}')">
+      <div class="text-sm ${n.is_read?'text-gray-600':'text-gray-900 font-medium'}">${esc(n.title)}</div>
+      ${n.body?`<div class="text-xs text-gray-500 mt-1">${esc(n.body)}</div>`:""}
+      <div class="text-xs text-gray-300 mt-1">${new Date(n.created_at).toLocaleString("zh-CN")}</div></div>`).join("")}</div>`}`;
+}
+
+// ====================================================================
+// 交互动作
+// ====================================================================
+function go(v){ state.view=v; if(v!=="screening"){state.activeScreen=null;} render(); }
+function loginAs(username){ const u=DB.users.find(x=>x.username===username); SESSION=u.id; localStorage.setItem("sr_session",SESSION); state.view="mine"; render(); }
+function logout(){ SESSION=null; localStorage.removeItem("sr_session"); state.view="login"; render(); }
+function openDetail(id){ state.scenarioId=id; state.view="detail"; render(); }
+function setF(k,v){ state.form[k]=v; }
+function toggleChip(field,val){ const a=state.form[field]; const i=a.indexOf(val); i>=0?a.splice(i,1):a.push(val); render(); }
+
+function saveScenario(submit){
+  const f=state.form;
+  const s={ id:nid("s"), title:f.title.trim(), status:"draft",
+    industry:[...f.industry], sap_modules:[...f.sap_modules], ai_capabilities:[...f.ai_capabilities],
+    customer_name:f.customer_name, pain_point:f.pain_point, human_process:f.human_process,
+    frequency:f.frequency, volume:f.volume,
+    kpi_candidates:f.kpi_candidates.split(/[,，、]/).map(x=>x.trim()).filter(Boolean),
+    data_basis:f.data_basis, willingness_to_pay:f.willingness_to_pay, estimated_value:f.estimated_value,
+    submitter_id:SESSION, latest_weighted_score:null, latest_recommendation:null, created_at:Date.now() };
+  if(submit){ const err=validate(s); if(err){ document.getElementById("formErr").innerHTML=`<div class="mb-4 text-sm text-red-600 bg-red-50 p-2 rounded">缺少必填字段：${err}</div>`; return; } }
+  DB.scenarios.push(s);
+  if(submit){ s.status="submitted"; DB.users.filter(u=>u.roles.includes("screener")).forEach(u=>notify(u.id,"scenario_submitted",`新场景待初筛：${s.title}`,null,s.id)); }
+  save(); state.form=blankForm(); openDetail(s.id);
+}
+function validate(s){ const m=[]; ["title","pain_point","human_process","data_basis"].forEach(k=>{ if(!s[k]) m.push(k); });
+  if(!s.industry.length||!s.sap_modules.length||!s.kpi_candidates.length) m.push("行业/模块/KPI"); return m.length?m.join("、"):null; }
+
+function submitScenario(id){ const s=DB.scenarios.find(x=>x.id===id); const err=validate(s);
+  if(err){ alert("缺少必填字段："+err); return; }
+  s.status="submitted"; DB.users.filter(u=>u.roles.includes("screener")).forEach(u=>notify(u.id,"scenario_submitted",`新场景待初筛：${s.title}`,null,s.id)); save(); render(); }
+
+function addComment(id){ const el=document.getElementById("cmt"); const v=el.value.trim(); if(!v) return;
+  DB.comments.push({id:nid("c"),scenario_id:id,author_id:SESSION,content:v,created_at:Date.now()}); save(); render(); }
+
+function pickScreen(id){ state.activeScreen=id; state.score={bv:3,feas:3,rep:3,strat:3}; state.veto=[]; state.scoreComment=""; render(); }
+function setScore(k,v){ state.score[k]=Number(v); render(); }
+function toggleVeto(k){ const i=state.veto.indexOf(k); i>=0?state.veto.splice(i,1):state.veto.push(k); render(); }
+
+function submitScore(id){
+  const s=DB.scenarios.find(x=>x.id===id); if(!(s.status==="submitted"||s.status==="screening")){ alert("当前状态不可初筛评分"); return; }
+  const sc=state.score, w=weighted(sc), reco=recommend(sc,state.veto);
+  DB.scores.push({id:nid("rs"),scenario_id:id,reviewer_id:SESSION,bv:sc.bv,feas:sc.feas,rep:sc.rep,strat:sc.strat,
+    weighted_score:w,recommendation:reco,veto:[...state.veto],comment:state.scoreComment,created_at:Date.now()});
+  if(s.status==="submitted") s.status="screening";
+  s.latest_weighted_score=w; s.latest_recommendation=reco;
+  notify(s.submitter_id,"screening_scored",`场景已初筛评分：${s.title}（${RECO_LABELS[reco]} / ${w}）`,state.scoreComment,s.id);
+  save();
+  const msgEl=document.getElementById("scoreMsg");
+  if(msgEl) msgEl.innerHTML=`<div class="mb-3 text-sm text-blue-700 bg-blue-50 p-2 rounded">已评分：加权分 ${w.toFixed(2)} → ${RECO_LABELS[reco]}</div>`;
+  render();
+}
+
+function doTransition(id,target){
+  const s=DB.scenarios.find(x=>x.id===id); const u=me();
+  const allowed=(TRANSITIONS[s.status]||{})[target];
+  if(!allowed){ alert(`不允许的状态流转：${STATUS_LABELS[s.status]} → ${STATUS_LABELS[target]}`); return; }
+  if(!allowed.some(r=>u.roles.includes(r))){ alert("当前角色无权执行该流转"); return; }
+  s.status=target;
+  if(state.scoreComment) DB.comments.push({id:nid("c"),scenario_id:id,author_id:SESSION,content:state.scoreComment,created_at:Date.now()});
+  if(target==="need_info") notify(s.submitter_id,"need_info",`场景需补充：${s.title}`,state.scoreComment,s.id);
+  save(); state.activeScreen=null; render();
+}
+
+function readNotif(id){ const n=DB.notifications.find(x=>x.id===id); if(n){ n.is_read=true; save(); render(); } }
+
+// ====================================================================
+// 启动
+// ====================================================================
+load();
+const sess=localStorage.getItem("sr_session");
+if(sess && userById(sess)){ SESSION=sess; state.view="mine"; }
+render();
+</script>
+</body>
+</html>
