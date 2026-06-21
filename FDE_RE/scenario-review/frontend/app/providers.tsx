@@ -1,5 +1,9 @@
 "use client";
 
+// React 19 适配：Arco 官方适配器，从 react-dom/client 注入 createRoot，
+// 使 Message/Notification/Modal 等命令式 API 不再调用已被移除的 ReactDOM.render。
+// 必须在任何 Arco 命令式调用之前加载。
+import "@arco-design/web-react/es/_util/react-19-adapter";
 import { ConfigProvider } from "@arco-design/web-react";
 import zhCN from "@arco-design/web-react/es/locale/zh-CN";
 
