@@ -17,12 +17,16 @@ import { IconLink, IconSend } from "@arco-design/web-react/icon";
 import { use, useEffect, useState } from "react";
 import PageContainer from "@/components/PageContainer";
 import { RecoBadge, StatusBadge } from "@/components/Badges";
+import DeepEvalSection from "@/components/DeepEvalSection";
 import { api } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
 import type { Attachment, Comment, ReviewScore, Scenario } from "@/lib/types";
 import { CONFIDENTIALITY_LABELS, VETO_FLAGS, WTP_LABELS } from "@/lib/types";
 
 export default function ScenarioDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const roles = useAuth((s) => s.user?.roles) ?? [];
+  const isMgr = roles.includes("manager") || roles.includes("admin");
   const [sc, setSc] = useState<Scenario | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [scores, setScores] = useState<ReviewScore[]>([]);
@@ -64,6 +68,26 @@ export default function ScenarioDetailPage({ params }: { params: Promise<{ id: s
       await api.post(`/api/scenarios/${id}/submit`);
       await reload();
       Message.success("已提交，等待初筛");
+    } catch (e) {
+      Message.error((e as Error).message);
+    }
+  }
+
+  async function act(target: string, label: string) {
+    try {
+      await api.post(`/api/scenarios/${id}/transition`, { target_status: target });
+      await reload();
+      Message.success(`已${label}`);
+    } catch (e) {
+      Message.error((e as Error).message);
+    }
+  }
+
+  async function kickoff() {
+    try {
+      await api.post(`/api/poc/from-scenario/${id}`);
+      await reload();
+      Message.success("POC 已立项");
     } catch (e) {
       Message.error((e as Error).message);
     }
@@ -127,6 +151,21 @@ export default function ScenarioDetailPage({ params }: { params: Promise<{ id: s
           提交初筛
         </Button>
       )}
+      {isMgr && sc.status === "poc_suggest" && (
+        <Button type="primary" style={{ marginTop: 14 }} onClick={kickoff}>
+          POC 立项
+        </Button>
+      )}
+      {isMgr && sc.status === "poc_success" && (
+        <Button type="primary" style={{ marginTop: 14 }} onClick={() => act("productizing", "进入产品化")}>
+          进入产品化
+        </Button>
+      )}
+      {isMgr && sc.status === "productizing" && (
+        <Button type="primary" style={{ marginTop: 14 }} onClick={() => act("productized", "标记已产品化")}>
+          标记已产品化
+        </Button>
+      )}
 
       <Card bordered={false} style={{ borderRadius: 8, marginTop: 16 }}>
         <Descriptions
@@ -136,6 +175,8 @@ export default function ScenarioDetailPage({ params }: { params: Promise<{ id: s
           data={data}
         />
       </Card>
+
+      <DeepEvalSection scenario={sc} onChange={reload} />
 
       {scores.length > 0 && (
         <Card bordered={false} style={{ borderRadius: 8, marginTop: 16 }} title="初筛评分记录">

@@ -103,6 +103,22 @@ async def screening_queue(
     return list(res.scalars().all())
 
 
+@router.get("/review-queue", response_model=list[ScenarioOut])
+async def review_queue(
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(
+        require_roles(Role.REVIEWER, Role.MANAGER, Role.SCREENER, Role.ADMIN)
+    ),
+) -> list[Scenario]:
+    """待评审会队列（pending_review，§6.5）。"""
+    res = await db.execute(
+        select(Scenario)
+        .where(Scenario.status == ScenarioStatus.PENDING_REVIEW)
+        .order_by(Scenario.created_at.asc())
+    )
+    return list(res.scalars().all())
+
+
 @router.get("/{scenario_id}", response_model=ScenarioOut)
 async def get_scenario(
     scenario_id: str,

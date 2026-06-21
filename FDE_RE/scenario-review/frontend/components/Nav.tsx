@@ -13,11 +13,26 @@ const ROLE_LABELS: Record<string, string> = {
   ai_rep: "AI研发", manager: "管理层", admin: "管理员",
 };
 
-const ITEMS: { key: string; path: string; label: string; screener?: boolean }[] = [
+type NavItem = { key: string; path: string; label: string; roles?: string[] };
+const ITEMS: NavItem[] = [
   { key: "scenarios", path: "/scenarios", label: "我的提报" },
   { key: "new", path: "/scenarios/new", label: "新建提报" },
   { key: "library", path: "/library", label: "场景库" },
-  { key: "screening", path: "/screening", label: "初筛队列", screener: true },
+  { key: "screening", path: "/screening", label: "初筛队列", roles: ["screener", "admin"] },
+  {
+    key: "meetings",
+    path: "/meetings",
+    label: "评审会",
+    roles: ["reviewer", "manager", "screener", "admin"],
+  },
+  { key: "poc", path: "/poc", label: "POC看板" },
+  {
+    key: "dashboard",
+    path: "/dashboard",
+    label: "驾驶舱",
+    roles: ["manager", "admin", "screener"],
+  },
+  { key: "incentive", path: "/incentive", label: "我的贡献" },
   { key: "notifications", path: "/notifications", label: "通知" },
 ];
 
@@ -46,8 +61,8 @@ export default function Nav() {
     }
   }, [token, pathname]);
 
-  const isScreener = user?.roles.includes("screener") || user?.roles.includes("admin");
-  const items = ITEMS.filter((i) => !i.screener || isScreener);
+  const roles = user?.roles ?? [];
+  const items = ITEMS.filter((i) => !i.roles || i.roles.some((r) => roles.includes(r)));
   const selected =
     items.find((i) => i.path === pathname)?.key ??
     (pathname.startsWith("/scenarios/new") ? "new" : pathname.startsWith("/scenario") ? "scenarios" : "");

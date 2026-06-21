@@ -12,6 +12,14 @@ const STATUS_COLOR: Record<string, string> = {
   recommend_deep: "green",
   rejected: "red",
   merged: "purple",
+  deep_eval: "cyan",
+  pending_review: "blue",
+  poc_suggest: "lime",
+  poc_running: "orangered",
+  poc_success: "green",
+  poc_failed: "red",
+  productizing: "gold",
+  productized: "green",
 };
 
 const RECO_COLOR: Record<string, string> = {
