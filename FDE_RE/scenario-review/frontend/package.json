@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@arco-design/web-react": "^2.66.15",
+    "echarts": "^6.1.0",
     "next": "16.2.9",
     "react": "19.2.0",
     "react-dom": "19.2.0",
