@@ -23,11 +23,7 @@ PASSED = {
 }
 
 
-@router.get("/dashboard", response_model=DashboardStats)
-async def dashboard(
-    db: AsyncSession = Depends(get_db),
-    _: User = Depends(require_roles(Role.MANAGER, Role.ADMIN, Role.SCREENER)),
-) -> DashboardStats:
+async def _compute(db: AsyncSession) -> DashboardStats:
     scs = (await db.execute(select(Scenario))).scalars().all()
     total = len(scs)
 
@@ -72,3 +68,17 @@ async def dashboard(
         total_annual_benefit=total_annual_benefit,
         avg_roi_multiple=avg_roi,
     )
+
+
+@router.get("/dashboard", response_model=DashboardStats)
+async def dashboard(
+    db: AsyncSession = Depends(get_db),
+    _: User = Depends(require_roles(Role.MANAGER, Role.ADMIN, Role.SCREENER)),
+) -> DashboardStats:
+    return await _compute(db)
+
+
+@router.get("/overview", response_model=DashboardStats)
+async def overview(db: AsyncSession = Depends(get_db)) -> DashboardStats:
+    """公开聚合概览（无敏感字段），供首页数字孪生大屏免登录展示。"""
+    return await _compute(db)

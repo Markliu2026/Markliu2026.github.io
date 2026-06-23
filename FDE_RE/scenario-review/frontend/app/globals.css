@@ -8,3 +8,58 @@ body {
     "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 a { text-decoration: none; }
+
+/* ============ 数字孪生大屏（首页）============ */
+.twin-root {
+  position: fixed; inset: 0; overflow-y: auto; overflow-x: hidden;
+  background:
+    radial-gradient(1200px 600px at 20% -10%, rgba(22,93,255,.25), transparent 60%),
+    radial-gradient(1000px 500px at 100% 10%, rgba(20,201,201,.18), transparent 55%),
+    linear-gradient(180deg, #05070f 0%, #070b1a 50%, #04060e 100%);
+  color: #c7d4f0;
+}
+.twin-grid {
+  position: absolute; inset: 0; pointer-events: none; opacity: .35;
+  background-image:
+    linear-gradient(rgba(60,110,220,.10) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(60,110,220,.10) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(circle at 50% 30%, #000 0%, transparent 85%);
+}
+.twin-scan {
+  position: absolute; left: 0; right: 0; height: 180px; pointer-events: none;
+  background: linear-gradient(180deg, transparent, rgba(22,93,255,.12), transparent);
+  animation: twinScan 7s linear infinite;
+}
+@keyframes twinScan { 0%{ top:-180px } 100%{ top:100% } }
+
+.twin-card {
+  background: linear-gradient(160deg, rgba(20,32,64,.55), rgba(10,18,40,.45));
+  border: 1px solid rgba(80,130,240,.22);
+  border-radius: 14px;
+  box-shadow: 0 0 0 1px rgba(80,130,240,.05) inset, 0 8px 30px rgba(0,0,0,.35);
+  backdrop-filter: blur(6px);
+}
+.twin-kpi-value {
+  font-size: 34px; font-weight: 800; letter-spacing: .5px;
+  background: linear-gradient(90deg, #5aa0ff, #36e0e0);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  text-shadow: 0 0 22px rgba(54,160,255,.35);
+}
+.twin-glow { animation: twinPulse 2.6s ease-in-out infinite; }
+@keyframes twinPulse {
+  0%,100% { filter: drop-shadow(0 0 3px rgba(54,160,255,.5)); }
+  50% { filter: drop-shadow(0 0 12px rgba(54,224,224,.9)); }
+}
+@keyframes twinFloat { 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-6px) } }
+
+/* 流动管线连线 */
+.twin-flow { stroke-dasharray: 7 9; animation: twinDash 1s linear infinite; }
+@keyframes twinDash { to { stroke-dashoffset: -16; } }
+.twin-node-ring { transform-box: fill-box; transform-origin: center; animation: twinRing 3s ease-in-out infinite; }
+@keyframes twinRing { 0%,100%{ opacity:.5; r:26 } 50%{ opacity:1; r:30 } }
+.twin-live-dot {
+  display:inline-block; width:8px; height:8px; border-radius:50%;
+  background:#23e08a; box-shadow:0 0 10px #23e08a; animation: twinBlink 1.4s infinite;
+}
+@keyframes twinBlink { 0%,100%{ opacity:1 } 50%{ opacity:.3 } }
